@@ -19,8 +19,8 @@ window.CASES.push(
         q: '"She\'s 19, so it isn\'t presbyopia. What is your main concern?"',
         options: [
           'A myope accommodates AND converges more through CLs than through minus specs, so a borderline convergence or accommodative insufficiency (or an over-minused lens) shows up at near.',
-          'Soft lenses dry out during reading: a reduced blink rate dehydrates the lens, which blurs near vision. She needs rewetting drops and a lower-water lens for study sessions. Review in a month.',
-          'She is under-corrected: young myopes need full correction at near, so add −0.50 to the CLs. A slightly over-minused lens makes reading easier for a 19-year-old. Review her in a month.',
+          'Soft lenses dry out during reading: a reduced blink rate dehydrates the lens, which blurs near vision. She needs rewetting drops and a lower-water lens for study sessions. Convergence isn\'t relevant.',
+          'She is under-corrected: young myopes need full correction at near, so add −0.50 to the CLs. A slightly over-minused lens makes reading easier for a 19-year-old. Accommodation isn\'t the issue.',
           'Myopes accommodate less through CLs than through minus specs, so her near point recedes, and she is showing early presbyopia even at 19 from long study hours.',
         ],
         answer: 0,
@@ -110,7 +110,7 @@ window.CASES.push(
         phase: 'Staging', topic: 'specialty', type: 'mcq',
         q: 'Steepest K about 50 D. What stage, and what do you fit?',
         options: [
-          'Mild (<48 D): spectacles or soft torics, since the corneal cyl is still regular and BCVA in glasses should be good. Review yearly for change.',
+          'Mild (<48 D): spectacles or soft torics, since the corneal cyl is still regular and BCVA in glasses should be good. Rigid lenses aren\'t needed yet.',
           'Moderate (48–54 D): rigid lenses (corneal RGP, e.g. Rose K2; or a mini-scleral). Specialty soft (KeraSoft-type) if RGP-intolerant.',
           'Severe (>54 D): spectacles, since rigid lenses won\'t centre on a cone this steep; then refer for a graft.',
           'Moderate (48–54 D): standard soft toric, because the cyl is regular and a soft lens is more comfortable.',
@@ -332,7 +332,7 @@ window.CASES.push(
         q: '"Which lens, which material, which modality, and why?"',
         options: [
           'SiHy daily disposable: MyDay sphere R and MyDay toric L (Dailies Total1 and DT1 for Astigmatism are also fine). High Dk/t for a diabetic cornea, no solutions or case, fresh lens each day for an allergic patient.',
-          'Low-water hydrogel monthly, because a hot kitchen dries lenses: low water content dehydrates less in heat, and a monthly with peroxide avoids preservatives for his allergy. Oxygen isn\'t a concern in daily wear. Review in 3 months.',
+          'Low-water hydrogel monthly, because a hot kitchen dries lenses: low water content dehydrates less in heat, and a monthly with peroxide avoids preservatives for his allergy. Oxygen isn\'t a concern in daily wear. DDs would dry out faster.',
           'Biofinity on 6-night extended wear, so he doesn\'t have to handle lenses at work: fewer insertions mean fewer chances of food contamination, and the high Dk/t suits a diabetic cornea.',
           'Toric lenses both eyes, R −5.50/−0.25 x180: correcting every bit of cyl gives the best vision in a busy kitchen, and a SiHy monthly toric covers his Rx with high Dk/t for the diabetes.',
         ],
@@ -489,8 +489,8 @@ window.CASES.push(
         q: '"What would you fit, and why?"',
         options: [
           'Biofinity XR toric both eyes: the only stock SiHy toric that covers +7.00 with −3.25 DC. Monthly, SiHy for the thick high-plus lens.',
-          'MyDay toric: covers +8.00, so it works. It\'s a daily SiHy, so no solutions, and −3.25 cyl is within its toric range at that power. Order it today.',
-          'Biofinity toric (standard): covers +7.00 with −3.25 DC in the standard range, with the same material as XR but shorter lead times. Order today.',
+          'MyDay toric: covers +8.00, so it works. It\'s a daily SiHy, so no solutions, and −3.25 cyl is within its toric range at that power. Its cyl goes to −3.75.',
+          'Biofinity toric (standard): covers +7.00 with −3.25 DC in the standard range, with the same material as XR but shorter lead times. XR isn\'t needed.',
           'Acuvue Oasys for Astigmatism: covers +7.00 with −3.25 DC, and the Blink Stabilized design suits a heavy high-plus lens.',
         ],
         answer: 0,
@@ -743,7 +743,7 @@ window.CASES.push(
         options: [
           'Check staining and lid eversion, then refit flatter (e.g. a lens with a flatter BC or lower sag) and consider a SiHy, which dehydrates less; preservative-free lubricants; review.',
           'Steepen the BC to 8.20: a steeper lens centres better and moves less, which stops the edge rubbing, and the end-of-day tightness settles as the lens beds in on the cornea. Review in a month.',
-          'Increase wear time to adapt: tightness late in the day means the eye hasn\'t adapted yet, so longer daily wear lets the cornea and lids get used to the lens. Review in a month. Then review.',
+          'Increase wear time to adapt: tightness late in the day means the eye hasn\'t adapted yet, so longer daily wear lets the cornea and lids get used to the lens. Review in a month; lubricants won\'t help.',
           'Prescribe a steroid: the redness and discomfort are inflammation from the lens, so a short course of topical steroid settles it and he can keep wearing the same lens.',
         ],
         answer: 0,
