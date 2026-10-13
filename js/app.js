@@ -45,6 +45,8 @@
   // ------------------------------------------------------------------ helpers
   const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   const shuffled = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // iOS decimal keypads have no +/− key, so signed power fields get a tap-to-flip sign button.
+  const signed = (input, id) => `<span class="signed">${input}<button type="button" class="sign-btn" data-sign="${id}" aria-label="Flip sign" tabindex="-1">±</button></span>`;
   const range = (n) => Array.from({ length: n }, (_, i) => i);
   const vtx = (F, d = 0.012) => F / (1 - d * F);
   const q25 = (x) => Math.round(x * 4) / 4;
@@ -378,9 +380,9 @@
       const from = st.from ? `<p class="muted" style="font-size:.9rem">Working from: <span class="mono">R ${esc(rxStr(st.from.R))} · L ${esc(rxStr(st.from.L))}</span></p>` : '';
       body = `${st.from ? from : `<div style="margin-bottom:.8rem"><p class="label">Spectacle Rx</p>${padHTML(c.spec)}</div>`}<div class="rxgrid">
         <span></span><span class="label">Sphere</span><span class="label">Cyl</span><span class="label">Axis</span>
-        ${['R', 'L'].map((e) => `<span class="eye">${e}</span>${['sph', 'cyl', 'axis'].map((f) => `<input type="text" inputmode="decimal" autocomplete="off" id="rx-${e}-${f}" aria-label="${e} ${f}" placeholder="${f === 'axis' ? '×' : '±0.00'}">`).join('')}`).join('')}
+        ${['R', 'L'].map((e) => `<span class="eye">${e}</span>${['sph', 'cyl', 'axis'].map((f) => f === 'axis' ? `<input type="text" inputmode="numeric" autocomplete="off" id="rx-${e}-${f}" aria-label="${e} ${f}" placeholder="×">` : signed(`<input type="text" inputmode="decimal" autocomplete="off" id="rx-${e}-${f}" aria-label="${e} ${f}" placeholder="±0.00">`, `rx-${e}-${f}`)).join('')}`).join('')}
       </div>
-      <p class="muted" style="font-size:.85rem;margin-top:.6rem">Type values like +5.25, −2.25, 20. Use "pl" for plano; for a DS answer put 0 in cyl and leave axis blank.</p>
+      <p class="muted" style="font-size:.85rem;margin-top:.6rem">Type values like +5.25, −2.25, 20 (tap ± to flip the sign). Use "pl" for plano; for a DS answer put 0 in cyl and leave axis blank.</p>
       <button class="btn primary" data-act="submit">Check my Rx</button>`;
     } else if (st.type === 'match') {
       body = `<div>${st.rows.map((r, i) => `<div class="matchrow"><label for="m-${i}"><b>${esc(r.label)}</b></label>
@@ -534,8 +536,8 @@
       <section class="card stack">
         <h2 style="font-size:1.15rem">Calculator</h2>
         <div class="inputs-4">
-          <div class="field"><label for="c-s">Sphere</label><input type="text" id="c-s" value="+4.00" inputmode="decimal"></div>
-          <div class="field"><label for="c-c">Cyl</label><input type="text" id="c-c" value="-3.00" inputmode="decimal"></div>
+          <div class="field"><label for="c-s">Sphere</label>${signed('<input type="text" id="c-s" value="+4.00" inputmode="decimal">', 'c-s')}</div>
+          <div class="field"><label for="c-c">Cyl</label>${signed('<input type="text" id="c-c" value="-3.00" inputmode="decimal">', 'c-c')}</div>
           <div class="field"><label for="c-a">Axis</label><input type="text" id="c-a" value="135" inputmode="numeric"></div>
           <div class="field"><label for="c-d">BVD (mm)</label><input type="text" id="c-d" value="12" inputmode="numeric"></div>
         </div>
@@ -620,7 +622,7 @@
     const res = lab.drillRes;
     document.getElementById('drill').innerHTML = `<div class="pad"><div><span class="eye">${eye}</span>${esc(rxStr([s, c, a]))}</div></div>
       <div class="rxgrid"><span></span><span class="label">Sphere</span><span class="label">Cyl</span><span class="label">Axis</span><span class="eye">${eye}</span>
-      ${['sph', 'cyl', 'axis'].map((f) => `<input type="text" id="d-${f}" inputmode="decimal" autocomplete="off" aria-label="${f}" value="${res ? esc(res[f].raw) : ''}">`).join('')}</div>
+      ${['sph', 'cyl', 'axis'].map((f) => { const inp = `<input type="text" id="d-${f}" inputmode="${f === 'axis' ? 'numeric' : 'decimal'}" autocomplete="off" aria-label="${f}" value="${res ? esc(res[f].raw) : ''}">`; return f === 'axis' ? inp : signed(inp, `d-${f}`); }).join('')}</div>
       <div class="row"><button class="btn primary" data-act="drill-check">Check</button><button class="btn" data-act="drill-new">New Rx</button></div>
       ${res ? `<div class="model"><p class="label">${res.all ? '<span class="ok">All correct</span>' : '<span class="no">Check the workings</span>'}</p>
         <p class="mono" style="margin:0">${D(s)} → ${r.m1.toFixed(2)}; ${D(s + c)} → ${r.m2.toFixed(2)}; cyl ${r.cyl.toFixed(2)}</p>
@@ -714,7 +716,18 @@
   }
   window.addEventListener('hashchange', route);
 
+  // Keep focus (and the on-screen keyboard) in the field when tapping the sign button.
+  document.addEventListener('pointerdown', (ev) => { if (ev.target.closest('.sign-btn')) ev.preventDefault(); });
   document.addEventListener('click', (ev) => {
+    const sb = ev.target.closest('.sign-btn');
+    if (sb) {
+      const inp = document.getElementById(sb.dataset.sign);
+      const v = inp.value.trim();
+      inp.value = /^[-−]/.test(v) ? '+' + v.slice(1) : '-' + v.replace(/^\+/, '');
+      inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
     const b = ev.target.closest('[data-act]');
     if (!b) return;
     const act = b.dataset.act, v = b.dataset.v;
