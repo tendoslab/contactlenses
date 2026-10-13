@@ -137,6 +137,15 @@ const LENSES = [
     notes: 'Adds +1.00, +1.50, +2.00, +2.50 in D (centre-distance) and N (centre-near) designs. The stock SiHy toric multifocal to name in the oral.',
   },
 
+  {
+    id: 'proclear-mf-toric', name: 'CooperVision Proclear Multifocal Toric', maker: 'CooperVision',
+    modality: 'Monthly', type: 'Toric multifocal', material: 'omafilcon B (hydrogel, PC Technology)', water: 62, dkt: null, modulus: null,
+    bc: '8.4 / 8.8', dia: '14.4', stab: 'Prism ballast', ew: 'No',
+    sph: { min: -20, max: 20, fine: 6 }, cyl: [-0.75, -1.25, -1.75, -2.25, -2.75, -3.25, -3.75, -4.25, -4.75, -5.25, -5.75], axisStep: 5,
+    notes: 'Custom-made hydrogel toric multifocal. Adds +1.00 to +4.00 in 0.50 D steps (D and N designs), so it reaches adds that Biofinity toric multifocal (max +2.50) can\'t. Hydrogel Dk/t is low, worst at the thick ballast. Confirm current Australian supply.',
+    confirm: true,
+  },
+
   // ---------- Spheres / multifocals (for EW, presbyopia and Ortho-K cases) ----------
   {
     id: 'biofinity', name: 'CooperVision Biofinity (sphere)', maker: 'CooperVision',
@@ -219,6 +228,14 @@ const FACTCHECK = [
   { claim: 'Diabetes is a contraindication to CL wear.', verdict: 'Wrong', fix: 'Not contraindicated. Reduced corneal sensitivity, fragile epithelial basement membrane adhesion and slower healing mean closer review, avoid EW, prefer DD and SiHy.' },
   { claim: 'Striae appear at 5% swelling and folds at 8%.', verdict: 'Fine', fix: 'Commonly taught as striae at ~5% and folds at ~8% (some sources say 10%). Each additional 1% oedema adds roughly one fold.' },
   { claim: 'A 10° nasal rotation in the RE means add 10°.', verdict: 'Wrong', fix: 'From the examiner\'s view, RE nasal rotation swings the bottom of the lens to your RIGHT, so LARS says subtract. LE nasal rotation swings left: add.' },
+  { claim: 'Ideal Ortho-K candidate has a flat K under 40 D.', verdict: 'Wrong', fix: 'Very flat corneas are harder to fit and correct less myopia. Typical guidance is Ks of roughly 41–46 D, corneal toricity ≤1.50 D WTR (less if ATR), astigmatism not limbus to limbus, and a normal or higher e-value (more e = more flattening available).' },
+  { claim: 'Harvitt–Bonanno\'s Dk/t of 125 limits overnight swelling to 3%.', verdict: 'Mixed up', fix: 'Holden–Mertz: 24 (no daytime oedema), 34 (8% overnight), 87 (4% overnight, same as no lens). Harvitt–Bonanno: 35 to avoid stromal anoxia by day, 125 to avoid anoxia anywhere in the cornea overnight.' },
+  { claim: 'A soft toric suits ATR because the thick part of the lens sits under the lids.', verdict: 'Right answer, wrong reason', fix: 'A minus-cyl lens is thickest along its most-minus meridian. For ATR (axis ~90) that is at 3 and 9, in the aperture; for WTR (axis ~180) it is at 12 and 6, under the lids. Soft torics suit ATR because spherical RGPs decentre laterally on ATR corneas and the 3/9 thickness works with thin-zone stabilisation.' },
+  { claim: 'A chef should get a low-water lens because the kitchen is hot.', verdict: 'Half right', fix: 'Heat does dehydrate high-water hydrogels. But for a diabetic chef the lead reason is oxygen: a SiHy daily disposable (high Dk/t, moderate water, no solutions) covers both.' },
+  { claim: 'Wait 5 minutes after anti-allergy drops before putting lenses in.', verdict: 'Too short', fix: 'Instil without lenses in and wait 10–15 minutes if the drop is preserved (BAK binds to soft lenses), or use a preservative-free unit dose such as ketotifen.' },
+  { claim: 'Wait 15–20 minutes after swimming before removing your lenses.', verdict: 'Not standard advice', fix: 'Remove and discard daily disposables as soon as practical after water exposure (rewet with sterile saline first if the lens feels stuck after fresh water). Better still, wear tight goggles. Never reuse a lens that has been in the water.' },
+  { claim: 'Proclear multifocal toric is the only soft option for low sphere / high cyl / high add.', verdict: 'Mostly right', fix: 'Biofinity toric multifocal covers the cyl (to −5.75) but its adds stop at +2.50. For a +3.25 add, Proclear Multifocal Toric (hydrogel, adds to +4.00) is the custom option; otherwise distance torics with readers, or RGPs.' },
+  { claim: 'A tight soft lens: vision is clear after a blink because the steep lens has plus power.', verdict: 'Imprecise', fix: 'The pattern is right (tight: clear just after the blink, then blurs; loose: blurs after the blink, then clears). The mechanism: the blink momentarily presses the vaulting lens onto the cornea; as it vaults again, the tear lens and lens flexure blur vision. The loose lens is dragged off the visual axis by the blink, then recentres.' },
 ];
 
 const SOURCES = [
