@@ -29,6 +29,7 @@
     ew: 'Extended wear',
     lifestyle: 'Water, sport & travel',
     specialty: 'Ortho-K & specialty',
+    aftercare: 'Aftercare & complications',
   };
 
   const CASES = window.CASES || [];
@@ -63,7 +64,12 @@
   function padHTML(spec) {
     const lines = ['R', 'L'].filter((e) => spec[e]).map((e) => `<div><span class="eye">${e}</span>${esc(rxStr(spec[e]))}</div>`);
     if (spec.add) lines.push(`<div><span class="eye">Add</span>+${spec.add.toFixed(2)}</div>`);
+    if (!lines.length) return '<p class="muted" style="margin:0">Not given for this case.</p>';
     return `<div class="pad">${lines.join('')}</div>`;
+  }
+  /* Optional extra record (K readings, slit-lamp findings, current lens) shown under the Rx. */
+  function findingsHTML(c) {
+    return c.findings ? `<div><p class="label">Findings</p><p style="margin:0">${esc(c.findings)}</p></div>` : '';
   }
 
   /* Power cross: spectacle meridian powers and their corneal-plane values. */
@@ -104,7 +110,8 @@
     perm: null, picked: new Set(), last: null,
   };
 
-  const casePasses = (c) => sim.source === 'all' || c.source.startsWith(sim.source);
+  const casePasses = (c) => sim.source === 'all'
+    || (sim.source === 'notes' ? !/^20\d\d/.test(c.source) : c.source.startsWith(sim.source));
   function poolCases() {
     return CASES.filter((c) => sim.cats.has(c.cat) && casePasses(c)).filter((c) => {
       if (sim.pool === 'new') return !saved.done[c.id];
@@ -193,7 +200,8 @@
         const raw = el ? el.value : '';
         const n = parseNum(raw);
         const acc = st.accept[e][f];
-        const ok = !Number.isNaN(n) && acc.some((a) => (f === 'axis' ? normAxis(n) === normAxis(a) : Math.abs(n - a) < 1e-3));
+        const ok = f === 'axis' && !acc.length ? raw.trim() === '' || n === 0 || Number.isNaN(n)
+          : !Number.isNaN(n) && acc.some((a) => (f === 'axis' ? normAxis(n) === normAxis(a) : Math.abs(n - a) < 1e-3));
         total++; if (ok) right++;
         rows.push({ e, f, raw, ok, acc });
       }));
@@ -257,7 +265,7 @@
       <div>
         <p class="label">Contact lens oral practice</p>
         <h1>Sit the oral before the oral</h1>
-        <p>${CASES.length} cases rebuilt from the 2022 and 2025 orals (${totalSteps} examiner questions), checked against current Australian lens parameters. Run whole cases the way the examiner does, or drill one topic.</p>
+        <p>${CASES.length} cases rebuilt from past orals and aftercare notes (${totalSteps} examiner questions), checked against current Australian lens parameters. Run whole cases the way the examiner does, or drill one topic.</p>
       </div>
     </section>
     <div class="grid-2">
@@ -282,7 +290,7 @@
           <div>
             <p class="label">Source</p>
             <div class="row" style="gap:.4rem">
-              ${['all', '2025', '2022'].map((s) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${s === 'all' ? 'All years' : s + ' orals'}</button>`).join('')}
+              ${[['all', 'All sources'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Examiner notes & aftercare']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
             </div>
           </div>
           <div>
@@ -327,6 +335,7 @@
       <p class="muted">${esc(c.theme)}</p>
       <div><p class="label">Patient</p><p style="font-size:1.1rem">${esc(c.patient)}</p></div>
       <div><p class="label">Spectacle Rx</p>${padHTML(c.spec)}</div>
+      ${findingsHTML(c)}
       <button class="btn primary big" data-act="begin">Begin: ${esc(c.steps[0].phase)}</button>
     </article>`;
   }
@@ -335,6 +344,7 @@
     return `<aside class="record card">
       <div><p class="label">Patient</p><p style="margin:0">${esc(c.patient)}</p></div>
       <div><p class="label">Spectacle Rx</p>${padHTML(c.spec)}</div>
+      ${findingsHTML(c)}
       <div><p class="label">Phase</p><span class="phase">${esc(st.phase)}</span></div>
       <div class="muted" style="font-size:.85rem">${esc(TOPICS[st.topic] || '')} · ${esc(c.source)}</div>
     </aside>`;
@@ -370,7 +380,7 @@
         <span></span><span class="label">Sphere</span><span class="label">Cyl</span><span class="label">Axis</span>
         ${['R', 'L'].map((e) => `<span class="eye">${e}</span>${['sph', 'cyl', 'axis'].map((f) => `<input type="text" inputmode="decimal" autocomplete="off" id="rx-${e}-${f}" aria-label="${e} ${f}" placeholder="${f === 'axis' ? '×' : '±0.00'}">`).join('')}`).join('')}
       </div>
-      <p class="muted" style="font-size:.85rem;margin-top:.6rem">Type values like +5.25, −2.25, 20. Use "pl" for plano.</p>
+      <p class="muted" style="font-size:.85rem;margin-top:.6rem">Type values like +5.25, −2.25, 20. Use "pl" for plano; for a DS answer put 0 in cyl and leave axis blank.</p>
       <button class="btn primary" data-act="submit">Check my Rx</button>`;
     } else if (st.type === 'match') {
       body = `<div>${st.rows.map((r, i) => `<div class="matchrow"><label for="m-${i}"><b>${esc(r.label)}</b></label>
@@ -408,7 +418,7 @@
       const src = st.from || c.spec;
       detail = `<div class="tablewrap"><table class="t"><tr><th>Eye</th><th>Field</th><th>You</th><th>Accepted</th></tr>
         ${L.detail.rows.map((r) => `<tr><td class="mono">${r.e}</td><td>${r.f}</td><td class="mono">${esc(r.raw || '—')} <span class="${r.ok ? 'ok' : 'no'}">${r.ok ? '✓' : '✕'}</span></td>
-        <td class="mono">${r.acc.map((a) => (r.f === 'axis' ? a : D(a))).join(' or ')}</td></tr>`).join('')}</table></div>
+        <td class="mono">${r.acc.length ? r.acc.map((a) => (r.f === 'axis' ? a : D(a))).join(' or ') : 'none (DS)'}</td></tr>`).join('')}</table></div>
         <div class="crosses">${['R', 'L'].map((e) => crossSVG(src[e], e === 'R' ? 'Right eye' : 'Left eye')).join('')}</div>
         <div class="tablewrap"><table class="t"><tr><th>Eye</th><th>Meridian 1</th><th>Meridian 2</th><th>Exact cyl</th><th>Exact SE</th></tr>${workings(src)}</table></div>`;
     } else if (st.type === 'match') {
@@ -465,7 +475,7 @@
     if (st.type === 'mcq') return `<div><p class="label">Best answer</p><p>${esc(st.options[st.answer])}</p></div>`;
     if (st.type === 'multi') return `<div><p class="label">Correct selections</p><ul class="answer-list">${st.answers.map((a) => `<li>${esc(st.options[a])}</li>`).join('')}</ul></div>`;
     if (st.type === 'match') return `<div class="tablewrap"><table class="t">${st.rows.map((r) => `<tr><td><b>${esc(r.label)}</b></td><td>${esc(r.options[r.answer])}</td></tr>`).join('')}</table></div>`;
-    if (st.type === 'rx') return `<div><p class="label">Accepted CL Rx</p><div class="pad">${['R', 'L'].map((e) => `<div><span class="eye">${e}</span>${st.accept[e].sph.map((x) => D(x)).join(' or ')} / ${st.accept[e].cyl.map((x) => D(x)).join(' or ')} × ${st.accept[e].axis.join(' or ')}</div>`).join('')}</div></div>`;
+    if (st.type === 'rx') return `<div><p class="label">Accepted CL Rx</p><div class="pad">${['R', 'L'].map((e) => `<div><span class="eye">${e}</span>${st.accept[e].sph.map((x) => D(x)).join(' or ')}${st.accept[e].axis.length ? ` / ${st.accept[e].cyl.map((x) => D(x)).join(' or ')} × ${st.accept[e].axis.join(' or ')}` : ' DS'}</div>`).join('')}</div></div>`;
     return '';
   }
   function renderBank() {

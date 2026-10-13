@@ -8,8 +8,8 @@ Open `index.html` in a browser. There is no build step and no server needed. Pro
 
 | Page | What it does |
 |---|---|
-| **Oral simulator** | 21 cases rebuilt from the 2022 and 2025 orals. *Full cases* mode runs each case in exam order (history → convert Rx → pick one lens → justify → fit → complications → lifestyle twist → care → plan B). *Topic drill* mode mixes single questions from one or more topics. Pools: All / New / Missed. |
-| **Question bank** | All 133 case questions plus 34 theory questions from the past-paper booklet and practice doc, filterable by topic, searchable, with model answers and Got it / Review again marks. |
+| **Oral simulator** | 34 cases: 21 rebuilt from the 2022 and 2025 orals, 8 from the 5th-year examiner question lists (Michael, Judy, Lily, Eric) and 5 aftercare/complication cases from the orals study doc and slide notes. *Full cases* mode runs each case in exam order (history → convert Rx → pick one lens → justify → fit → complications → lifestyle twist → care → plan B). *Topic drill* mode mixes single questions from one or more topics. Pools: All / New / Missed. Source filter: 2025, 2022, or examiner notes & aftercare. |
+| **Question bank** | All 197 case questions plus 63 theory questions from the past-paper booklet, practice doc, CL orals study doc, slide exam notes and Lily's commonly-asked list, filterable by topic, searchable, with model answers and Got it / Review again marks. |
 | **Rx lab** | Calculator (both meridians, any BVD, nasal-torque axis rounding, spherical-equivalent compromise), a random-Rx conversion drill, and a LARS helper. |
 | **Lens guide** | Parameters for the lenses that come up in the orals, a "will it fit?" checker for a CL Rx, care systems and RGP materials. |
 | **Fact check** | Claims in the student notes that were wrong or out of date, with the correction and sources. |
@@ -20,6 +20,8 @@ Every question is tagged with one of these topics:
 
 History & patient selection · Rx conversion & optics · Lens selection & modality · Materials, Dk & modulus · Fit assessment & toric stability · Rigid lenses (RGP) · Presbyopia · Extended wear · Water, sport & travel · Care systems · Complications · Ortho-K & specialty
 
+Case categories add **Aftercare & complications** (tight lens, SEAL, SLK, red eye after EW, RGP 3 & 9 staining, slide questions).
+
 ## Files
 
 ```
@@ -29,6 +31,7 @@ js/data-lenses.js     lens parameters, solutions, RGP materials, fact-check list
 js/data-theory.js     past-paper theory questions
 js/cases-2025.js      cases from the 2025 orals
 js/cases-2022.js      cases from the 2022 orals
+js/cases-notes.js     cases from the examiner question lists and aftercare notes
 js/app.js             simulator, question bank, Rx lab, lens guide, fact check
 ```
 
@@ -41,6 +44,8 @@ Copy any case object in `js/cases-2025.js` and edit it. Each step needs `phase`,
 - `rx`: `accept: { R: { sph: [...], cyl: [...], axis: [...] }, L: {...} }`; optional `from` if the step works from a different spectacle Rx (e.g. a monovision near Rx)
 - `match`: `rows: [{ label, options, answer }]`
 - `open`: say the answer aloud, reveal the model answer, mark yourself
+
+Optional case fields: `findings` (Ks, slit-lamp findings, current lens) shows under the Rx; `spec: {}` for aftercare cases with no Rx. In an `rx` step, `cyl: [0], axis: []` expects a DS answer (axis left blank).
 
 The examiner's name in the feedback is set by `EXAMINER` at the top of `js/app.js`.
 
