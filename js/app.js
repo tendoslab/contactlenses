@@ -31,6 +31,11 @@
     specialty: 'Ortho-K & specialty',
     aftercare: 'Aftercare & complications',
   };
+  // Colour wheel positions (hue) so each topic and case category gets its own tint.
+  const TOPIC_HUE = { complications: 0, history: 30, fitting: 55, care: 95, materials: 135, lenschoice: 170, lifestyle: 195, rx: 225, specialty: 250, rgp: 275, presbyopia: 305, ew: 335 };
+  const CAT_HUE = { soft: 225, rgp: 275, presbyopia: 305, ew: 335, lifestyle: 195, specialty: 160, aftercare: 15 };
+  const MOD_HUE = { Daily: 170, 'Two-weekly': 275, Monthly: 225 };
+  const topicPill = (id) => `<span class="pill tint" style="--h:${TOPIC_HUE[id] ?? 225}">${esc(TOPICS[id] || id)}</span>`;
 
   const CASES = window.CASES || [];
   const view = document.getElementById('view');
@@ -40,6 +45,14 @@
   let saved = { done: {}, missed: {}, seen: {}, bank: {} };
   try { saved = Object.assign(saved, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) { /* storage unavailable */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch (e) { /* ignore */ } };
+  // Values typed into the Rx lab and lens finder survive switching tabs and reloading.
+  const FIELDS_KEY = STORE_KEY + ':fields';
+  const KEEP = /^[clf]-/;
+  let fields = {};
+  try { fields = JSON.parse(localStorage.getItem(FIELDS_KEY)) || {}; } catch (e) { /* storage unavailable */ }
+  function restoreFields() {
+    view.querySelectorAll('input[id], select[id]').forEach((el) => { if (KEEP.test(el.id) && fields[el.id] !== undefined) el.value = fields[el.id]; });
+  }
   const stepKey = (c, i) => `${c.id}#${i}`;
 
   // ------------------------------------------------------------------ helpers
@@ -161,7 +174,7 @@
 
   function prepStep() {
     const st = curStep();
-    sim.picked = new Set(); sim.last = null; sim.revealed = false;
+    sim.picked = new Set(); sim.last = null; sim.revealed = false; sim.draft = {};
     if (!st) { sim.perm = null; return; }
     if (st.type === 'mcq' || st.type === 'multi') sim.perm = shuffled(range(st.options.length));
     else if (st.type === 'match') sim.perm = st.rows.map((r) => shuffled(range(r.options.length)));
@@ -241,6 +254,8 @@
     scorePill.textContent = `Score ${sim.score} / ${sim.max}`;
     const fn = { start: viewStart, intro: viewIntro, question: viewQuestion, feedback: viewFeedback, end: viewEnd }[sim.view];
     view.innerHTML = `<div class="fade">${fn()}</div>`;
+    // Put back anything typed into this question before a tab switch or the model-answer reveal.
+    if (sim.view === 'question') Object.entries(sim.draft || {}).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; });
     if (sim.view !== 'start') window.scrollTo({ top: 0 });
   }
 
@@ -250,11 +265,11 @@
     const list = isCases
       ? Object.entries(CATS).map(([id, name]) => {
         const n = CASES.filter((c) => c.cat === id && casePasses(c)).length;
-        return catButton('cat', id, name, `${n} case${n === 1 ? '' : 's'}`, sim.cats.has(id));
+        return catButton('cat', id, name, `${n} case${n === 1 ? '' : 's'}`, sim.cats.has(id), CAT_HUE[id]);
       })
       : Object.entries(TOPICS).map(([id, name]) => {
         const n = CASES.filter(casePasses).reduce((a, c) => a + c.steps.filter((s) => s.topic === id).length, 0);
-        return catButton('topic', id, name, `${n} question${n === 1 ? '' : 's'}`, sim.topics.has(id));
+        return catButton('topic', id, name, `${n} question${n === 1 ? '' : 's'}`, sim.topics.has(id), TOPIC_HUE[id]);
       });
     const all = isCases ? CASES.filter((c) => sim.cats.has(c.cat) && casePasses(c)) : null;
     const counts = isCases
@@ -321,8 +336,8 @@
     </div>`;
   }
 
-  function catButton(kind, id, name, sub, on) {
-    return `<button class="cat" data-act="toggle-${kind}" data-v="${id}" aria-pressed="${on}">
+  function catButton(kind, id, name, sub, on, hue) {
+    return `<button class="cat" style="--h:${hue}" data-act="toggle-${kind}" data-v="${id}" aria-pressed="${on}">
       <span class="tick" aria-hidden="true">${on ? '✓' : ''}</span>
       <span><b>${esc(name)}</b><small>${esc(sub)}</small></span><span></span></button>`;
   }
@@ -332,7 +347,7 @@
     const caseNo = sim.items.slice(0, sim.i + 1).filter((x) => x.intro).length;
     const nCases = sim.items.filter((x) => x.intro).length;
     return `<article class="intro card stack">
-      <div class="meta"><span class="pill accent">${esc(CATS[c.cat])}</span><span class="pill">${esc(c.source)}</span><span class="pill">Case ${caseNo} of ${nCases}</span></div>
+      <div class="meta"><span class="pill tint" style="--h:${CAT_HUE[c.cat]}">${esc(CATS[c.cat])}</span><span class="pill">${esc(c.source)}</span><span class="pill">Case ${caseNo} of ${nCases}</span></div>
       <h1>${esc(c.title)}</h1>
       <p class="muted">${esc(c.theme)}</p>
       <div><p class="label">Patient</p><p style="font-size:1.1rem">${esc(c.patient)}</p></div>
@@ -348,7 +363,7 @@
       <div><p class="label">Spectacle Rx</p>${padHTML(c.spec)}</div>
       ${findingsHTML(c)}
       <div><p class="label">Phase</p><span class="phase">${esc(st.phase)}</span></div>
-      <div class="muted" style="font-size:.85rem">${esc(TOPICS[st.topic] || '')} · ${esc(c.source)}</div>
+      <div class="row" style="gap:.35rem">${topicPill(st.topic)}<span class="muted" style="font-size:.85rem">${esc(c.source)}</span></div>
     </aside>`;
   }
 
@@ -505,7 +520,7 @@
       <div class="stack" id="bank-list">${list.map((it) => {
         const stt = bankStatus(it);
         return `<details class="qitem ${stt}" data-key="${esc(it.key)}" ${bank.open.has(it.key) ? 'open' : ''}>
-          <summary><div><div class="qtext">${esc(it.q)}</div><div class="qmeta"><span class="pill accent">${esc(TOPICS[it.topic])}</span><span class="pill">${esc(it.source)}</span>${stt === 'known' ? '<span class="pill good">Got it</span>' : stt === 'missed' ? '<span class="pill bad">Review again</span>' : ''}</div></div><span class="muted" aria-hidden="true">▾</span></summary>
+          <summary><div><div class="qtext">${esc(it.q)}</div><div class="qmeta">${topicPill(it.topic)}<span class="pill">${esc(it.source)}</span>${stt === 'known' ? '<span class="pill good">Got it</span>' : stt === 'missed' ? '<span class="pill bad">Review again</span>' : ''}</div></div><span class="muted" aria-hidden="true">▾</span></summary>
           <div class="body">${correctAnswerHTML(it.step)}<div class="model"><p class="label">Model answer</p>${it.model}</div>
           <div class="row"><button class="btn" data-act="bank-mark" data-v="known" data-key="${esc(it.key)}">Got it</button><button class="btn" data-act="bank-mark" data-v="missed" data-key="${esc(it.key)}">Review again</button></div></div>
         </details>`;
@@ -513,7 +528,7 @@
   }
 
   // ------------------------------------------------------------------ Rx lab
-  const lab = { drill: null, drillRes: null };
+  const lab = { drill: null, drillRes: null, typed: {} };
   function convert(s, c, a, d) {
     const m1 = vtx(s, d / 1000), m2 = vtx(s + c, d / 1000);
     return { m1, m2, sph: m1, cyl: m2 - m1, axis: a };
@@ -531,11 +546,12 @@
   function renderLab() {
     view.innerHTML = `<div class="fade">
     <section class="hero"><div><p class="label">Rx lab</p><h1>Vertex, round, rotate</h1>
-    <p>Practise the mental maths the examiner asks for: both meridians to the corneal plane, snap to a lens you can order, nasal torque, LARS and the spherical-equivalent compromise.</p></div></section>
+    <p>Practise the mental maths the examiner asks for: both meridians to the corneal plane, snap to a lens you can order, nasal torque, LARS and the spherical-equivalent compromise.</p>
+    <button class="btn" data-act="to-guide" style="margin-top:.8rem">How to convert a spectacle Rx, step by step ↓</button></div></section>
     <div class="lab-grid">
-      <section class="card stack">
+      <section class="card stack hue-top" style="--h:225">
         <h2 style="font-size:1.15rem">Calculator</h2>
-        <div class="inputs-4">
+        <div class="inputs-4" style="grid-template-columns:repeat(2,minmax(0,1fr))">
           <div class="field"><label for="c-s">Sphere</label>${signed('<input type="text" id="c-s" value="+4.00" inputmode="decimal">', 'c-s')}</div>
           <div class="field"><label for="c-c">Cyl</label>${signed('<input type="text" id="c-c" value="-3.00" inputmode="decimal">', 'c-c')}</div>
           <div class="field"><label for="c-a">Axis</label><input type="text" id="c-a" value="135" inputmode="numeric"></div>
@@ -548,12 +564,12 @@
         </div>
         <div id="calc-out"></div>
       </section>
-      <section class="card stack">
+      <section class="card stack hue-top" style="--h:170">
         <h2 style="font-size:1.15rem">Drill: convert this Rx</h2>
         <p class="muted" style="margin:0">Round sphere and cyl to 0.25 D (0.50 D beyond ±6.00), axes to 10° steps using nasal torque.</p>
         <div id="drill"></div>
       </section>
-      <section class="card stack">
+      <section class="card stack hue-top" style="--h:275">
         <h2 style="font-size:1.15rem">LARS helper</h2>
         <div class="inputs-4">
           <div class="field"><label for="l-a">Ordered axis</label><input type="text" id="l-a" value="130" inputmode="numeric"></div>
@@ -563,8 +579,74 @@
         <div id="lars-out"></div>
         <p class="muted" style="font-size:.9rem;margin:0">Only for a lens that sits STABLY off-axis. A rocking lens needs a different design, not LARS. Each clock hour is 30°.</p>
       </section>
-    </div></div>`;
-    calc(); lars(); newDrill();
+    </div>
+    ${guideHTML()}</div>`;
+    restoreFields();
+    calc(); lars();
+    if (lab.drill) drawDrill(); else newDrill();
+  }
+
+  /* Step-by-step conversion guide under the Rx lab tools. The worked example and the
+     quick-reference table are computed with the same functions the calculator uses. */
+  function guideHTML() {
+    const ex = convert(4, -3, 135, 12);
+    const exSph = orderable(ex.sph), exCyl = q25(ex.cyl);
+    const exAx = roundAxis(135, 'R', 10).axis;
+    const seSph = orderable(exSph + (exCyl + 2.25) / 2);
+    const powers = [4, 5, 6, 7, 8, 9, 10, 12];
+    const refRows = powers.map((p) => `<tr><td class="mono">±${p.toFixed(2)}</td>
+      <td class="mono">${D(-p)} → <b>${D(orderable(vtx(-p)))}</b> <span class="muted">(${vtx(-p).toFixed(2)})</span></td>
+      <td class="mono">${D(p)} → <b>${D(orderable(vtx(p)))}</b> <span class="muted">(${vtx(p).toFixed(2)})</span></td></tr>`).join('');
+    return `<section class="card guide hue-top" id="guide" style="--h:30;margin-top:1.5rem">
+      <p class="label">Guide</p>
+      <h2>Converting a spectacle Rx to a contact lens Rx</h2>
+      <p class="muted">The examiner wants to see the method, not just the answer. Say each step out loud. Pen and paper are allowed; a calculator isn't.</p>
+      <ol class="steps">
+        <li><h3>Check it's in minus-cyl form</h3>
+          <p>Soft torics are written in minus cyl. If the Rx is in plus cyl, transpose: add the cyl to the sphere, flip the cyl sign, and turn the axis 90°.</p>
+          <p class="mono eg">+1.00 / +3.00 × 45 → +4.00 / −3.00 × 135</p></li>
+        <li><h3>Decide if it needs vertexing</h3>
+          <p>Vertex distance matters once either principal meridian is <b>±4.00 D or more</b>. Below that, the change is under 0.20 D and the spectacle powers carry straight over. Look at both meridians, not just the sphere: +1.00 / −4.00 has a −3.00 meridian, which still doesn't need it, while −3.50 / −1.00 has a −4.50 meridian, which does.</p></li>
+        <li><h3>Split into the two principal meridians</h3>
+          <p>Draw a power cross. One meridian carries the sphere power along the axis; the other, 90° away, carries sphere + cyl.</p>
+          <p class="mono eg">+4.00 / −3.00 × 135 → +4.00 @ 135 and +1.00 @ 45</p></li>
+        <li><h3>Vertex each meridian to the cornea</h3>
+          <p>Use <span class="mono">F<sub>c</sub> = F / (1 − dF)</span> with d in metres (12 mm = 0.012). Do it for <b>both</b> meridians. Never vertex the sphere and copy the cyl across: the cyl changes too.</p>
+          <p class="mono eg">+4.00 / (1 − 0.012 × 4.00) = ${ex.m1.toFixed(2)}<br>+1.00 / (1 − 0.012 × 1.00) = ${ex.m2.toFixed(2)}</p>
+          <p class="muted">Quick check in your head: the change is about <span class="mono">F² × d</span> (4² × 0.012 ≈ 0.19). <b>Plus gets more plus, minus gets less minus.</b></p></li>
+        <li><h3>Rebuild the sphero-cyl</h3>
+          <p>Sphere = the vertexed power on the axis meridian. Cyl = the other vertexed meridian minus that one. The axis doesn't change.</p>
+          <p class="mono eg">${ex.sph.toFixed(2)} / (${ex.m2.toFixed(2)} − ${ex.m1.toFixed(2)}) = ${ex.sph.toFixed(2)} / ${ex.cyl.toFixed(2)} × 135</p></li>
+        <li><h3>Round to powers that are made</h3>
+          <p>Sphere to the nearest 0.25 D (0.50 D steps beyond ±6.00 in most soft lenses). Cyl to a power the lens actually comes in: most soft torics only make −0.75, −1.25, −1.75 and −2.25, and extended-range lenses go on to −2.75, −3.25 and beyond. On a half-way value, lean towards the more positive power (less minus, more plus) and confirm with an over-refraction at the fit.</p>
+          <p class="mono eg">${ex.sph.toFixed(2)} → ${D(exSph)}; ${ex.cyl.toFixed(2)} → ${D(exCyl)}</p></li>
+        <li><h3>Round the axis with nasal torque</h3>
+          <p>Most torics come in 10° steps (some in 5°). If the axis isn't made, round it the way the lens tends to rotate: lids drive it nasally. As you face the patient, a <b>right</b> lens swings to your right → round <b>down</b> (subtract); a <b>left</b> lens swings to your left → round <b>up</b> (add).</p>
+          <p class="mono eg">RE × 135 → × ${exAx}</p></li>
+        <li><h3>If the cyl is out of range, use the spherical equivalent</h3>
+          <p>If the lens you've picked doesn't make that much cyl, drop the cyl to its maximum and add half of what you dropped to the sphere, so the spherical equivalent stays the same. Tell the examiner the trade-off: some residual astigmatism, or go to an extended-range toric or RGP instead.</p>
+          <p class="mono eg">${D(exSph)} / ${D(exCyl)} with a −2.25 max: drop ${D(exCyl + 2.25)} → sphere ${D((exCyl + 2.25) / 2)} → ${D(seSph)} / −2.25 × ${exAx}</p></li>
+        <li><h3>Write the final CL Rx</h3>
+          <p class="mono eg"><b>RE ${D(exSph)} / ${D(exCyl)} × ${exAx}</b> (extended-range toric), or <b>${D(seSph)} / −2.25 × ${exAx}</b> in a standard daily toric</p></li>
+        <li><h3>At the fit: LARS for a stable, rotated lens</h3>
+          <p><b>L</b>eft <b>A</b>dd, <b>R</b>ight <b>S</b>ubtract, judged as you look at the patient. If the marker sits away from 6 o'clock but stays put on the blink, add or subtract the rotation from the ordered axis. Each clock hour is 30° (one minute mark is 6°). If it rocks, don't LARS: change the design or fit.</p></li>
+      </ol>
+      <div class="grid-2" style="gap:1rem">
+        <div><p class="label">Quick reference at 12 mm (spherical powers)</p>
+          <div class="tablewrap"><table class="t"><tr><th>Spectacle</th><th>Myope</th><th>Hyperope</th></tr>${refRows}</table></div>
+          <p class="muted" style="font-size:.85rem;margin:0">Order value in bold (0.50 D steps past ±6.00), exact corneal-plane power in brackets.</p></div>
+        <div class="stack" style="gap:.6rem">
+          <div><p class="label">Common slips</p>
+          <ul class="answer-list">
+            <li>Vertexing only the sphere and copying the cyl across.</li>
+            <li>Ordering a cyl that isn't made (−1.00, −1.50, −2.00 in most soft torics).</li>
+            <li>Rounding the axis the wrong way for the eye.</li>
+            <li>Adding the near add to the vertexed distance Rx for a multifocal. Vertex the distance Rx; the add goes on as the lens's own add (low/med/high).</li>
+            <li>Forgetting that RGPs also need a tear-lens correction: steeper than K adds plus, so add minus to the lens (SAM-FAP, about 0.25 D per 0.05 mm).</li>
+          </ul></div>
+        </div>
+      </div>
+    </section>`;
   }
   function calc() {
     const s = parseNum(document.getElementById('c-s').value), c = parseNum(document.getElementById('c-c').value);
@@ -603,7 +685,7 @@
     const c = pick([-0.75, -1, -1.25, -1.5, -2, -2.5, -3, -4]);
     const eye = pick(['R', 'L']);
     const a = pick(range(36).map((i) => (i + 1) * 5));
-    lab.drill = { s, c, a, eye }; lab.drillRes = null;
+    lab.drill = { s, c, a, eye }; lab.drillRes = null; lab.typed = {};
     drawDrill();
   }
   function drillAccepts(x, coarse) {
@@ -622,7 +704,7 @@
     const res = lab.drillRes;
     document.getElementById('drill').innerHTML = `<div class="pad"><div><span class="eye">${eye}</span>${esc(rxStr([s, c, a]))}</div></div>
       <div class="rxgrid"><span></span><span class="label">Sphere</span><span class="label">Cyl</span><span class="label">Axis</span><span class="eye">${eye}</span>
-      ${['sph', 'cyl', 'axis'].map((f) => { const inp = `<input type="text" id="d-${f}" inputmode="${f === 'axis' ? 'numeric' : 'decimal'}" autocomplete="off" aria-label="${f}" value="${res ? esc(res[f].raw) : ''}">`; return f === 'axis' ? inp : signed(inp, `d-${f}`); }).join('')}</div>
+      ${['sph', 'cyl', 'axis'].map((f) => { const inp = `<input type="text" id="d-${f}" inputmode="${f === 'axis' ? 'numeric' : 'decimal'}" autocomplete="off" aria-label="${f}" value="${esc(lab.typed[f] || '')}">`; return f === 'axis' ? inp : signed(inp, `d-${f}`); }).join('')}</div>
       <div class="row"><button class="btn primary" data-act="drill-check">Check</button><button class="btn" data-act="drill-new">New Rx</button></div>
       ${res ? `<div class="model"><p class="label">${res.all ? '<span class="ok">All correct</span>' : '<span class="no">Check the workings</span>'}</p>
         <p class="mono" style="margin:0">${D(s)} → ${r.m1.toFixed(2)}; ${D(s + c)} → ${r.m2.toFixed(2)}; cyl ${r.cyl.toFixed(2)}</p>
@@ -659,8 +741,8 @@
     </section>
     <div class="row" style="gap:.4rem;margin-bottom:.6rem">${mods.map((m) => `<button class="chip" data-act="lens-mod" data-v="${m}" aria-pressed="${lensView.modality === m}">${m === 'all' ? 'All modalities' : m}</button>`).join('')}</div>
     <div class="row" style="gap:.4rem;margin-bottom:1rem">${types.map((t) => `<button class="chip" data-act="lens-type" data-v="${t}" aria-pressed="${lensView.type === t}">${t === 'all' ? 'All designs' : t}</button>`).join('')}</div>
-    <div class="lens-grid">${list.map((l) => `<article class="card lens">
-      <div class="row" style="gap:.35rem"><span class="pill accent">${esc(l.modality)}</span><span class="pill">${esc(l.type)}</span>${l.confirm ? '<span class="pill warn">confirm</span>' : ''}</div>
+    <div class="lens-grid">${list.map((l) => `<article class="card lens hue-top" style="--h:${MOD_HUE[l.modality] ?? 225}">
+      <div class="row" style="gap:.35rem"><span class="pill tint">${esc(l.modality)}</span><span class="pill">${esc(l.type)}</span>${l.confirm ? '<span class="pill warn">confirm</span>' : ''}</div>
       <h3>${esc(l.name)}</h3>
       <dl><dt>Material</dt><dd>${esc(l.material)}</dd><dt>Water</dt><dd>${l.water}%</dd><dt>Dk/t</dt><dd>${l.dkt ?? '—'}</dd><dt>Modulus</dt><dd>${l.modulus ? l.modulus + ' MPa' : '—'}</dd>
       <dt>BC / Dia</dt><dd>${esc(l.bc)} / ${esc(l.dia)}</dd><dt>Sphere</dt><dd>${esc(sphTxt(l))}</dd>
@@ -672,7 +754,7 @@
     <section style="margin-top:2rem" class="stack"><h2>RGP materials</h2><div class="tablewrap"><table class="t"><tr><th>Material</th><th>Family</th><th>Dk</th><th>Notes</th></tr>
       ${RGP_MATERIALS.map((m) => `<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.family)}</td><td class="mono">${esc(m.dk)}</td><td>${esc(m.notes)}</td></tr>`).join('')}</table></div></section>
     </div>`;
-    finder();
+    restoreFields(); finder();
   }
   function finder() {
     const out = document.getElementById('finder-out');
@@ -760,6 +842,7 @@
       case 'bank-topic': bank.topic = v; renderBank(); break;
       case 'bank-mark': saved.bank[b.dataset.key] = v; if (v === 'known') delete saved.missed[b.dataset.key]; persist(); bank.open.add(b.dataset.key); renderBank(); break;
       case 'drill-new': newDrill(); break;
+      case 'to-guide': { const g = document.getElementById('guide'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
       case 'drill-check': checkDrill(); break;
       case 'lens-mod': lensView.modality = v; renderLenses(); break;
       case 'lens-type': lensView.type = v; renderLenses(); break;
@@ -773,7 +856,16 @@
       default: break;
     }
   });
+  // Remember what's typed so a re-render (tab switch, reveal, reload) doesn't wipe it.
+  function remember(el) {
+    const id = el.id;
+    if (!id || !('value' in el)) return;
+    if (KEEP.test(id)) { fields[id] = el.value; try { localStorage.setItem(FIELDS_KEY, JSON.stringify(fields)); } catch (e) { /* ignore */ } }
+    else if (id.startsWith('d-')) lab.typed[id.slice(2)] = el.value;
+    else if (sim.view === 'question' && /^(rx-|m-|open-notes$)/.test(id)) sim.draft[id] = el.value;
+  }
   document.addEventListener('input', (ev) => {
+    remember(ev.target);
     const id = ev.target.id;
     if (id === 'count-range') { sim.count = Number(ev.target.value); const o = document.getElementById('count-out'); if (o) o.textContent = sim.count; const s = document.querySelector('[data-act="start"]'); if (s) s.textContent = `Start ${sim.count} ${sim.mode === 'cases' ? (sim.count === 1 ? 'case' : 'cases') : 'questions'}`; }
     else if (id === 'bank-q') { bank.q = ev.target.value; const pos = ev.target.selectionStart; renderBank(); const el = document.getElementById('bank-q'); el.focus(); el.setSelectionRange(pos, pos); }
@@ -782,6 +874,7 @@
     else if (id && id.startsWith('f-')) finder();
   });
   document.addEventListener('change', (ev) => {
+    remember(ev.target);
     if (ev.target.id === 'bank-status') { bank.status = ev.target.value; renderBank(); }
     else if (ev.target.id && ev.target.id.startsWith('c-')) calc();
     else if (ev.target.id && ev.target.id.startsWith('l-')) lars();
