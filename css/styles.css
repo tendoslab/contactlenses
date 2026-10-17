@@ -30,8 +30,9 @@
   --tint-s: 80%; --tint-bg: 94%; --tint-fg: 30%; --tint-mid: 45%;
   --shadow: 0 1px 2px rgba(20, 32, 51, .06), 0 6px 18px -8px rgba(20, 32, 51, .18);
 
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Inter everywhere, shared with the Thera Orals site. */
+  --font-display: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --r: 10px;
@@ -69,10 +70,10 @@ body {
   background: var(--bg) linear-gradient(180deg, var(--glow) 0, var(--bg) 26rem) no-repeat;
   font: 400 var(--step-0)/1.55 var(--font-body);
 }
-h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; letter-spacing: -.01em; }
-h1 { font-size: var(--step-3); font-weight: 700; }
-h2 { font-size: var(--step-2); font-weight: 650; }
-h3 { font-size: var(--step-1); font-weight: 600; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; text-wrap: balance; margin: 0; letter-spacing: -.02em; }
+h1 { font-size: var(--step-3); font-weight: 800; }
+h2 { font-size: var(--step-2); font-weight: 700; }
+h3 { font-size: var(--step-1); font-weight: 700; }
 p { margin: 0 0 .7em; }
 a { color: var(--accent); }
 button, input, select, textarea { font: inherit; color: inherit; }
