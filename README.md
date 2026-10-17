@@ -10,7 +10,7 @@ Open `index.html` in a browser. There is no build step and no server needed. Pro
 |---|---|
 | **Oral simulator** | 34 cases: 21 rebuilt from the 2022 and 2025 orals, 8 from the 5th-year examiner question lists (Michael, Judy, Lily, Eric) and 5 aftercare/complication cases from the orals study doc and slide notes. *Full cases* mode runs each case in exam order (history → convert Rx → pick one lens → justify → fit → complications → lifestyle twist → care → plan B). *Topic drill* mode mixes single questions from one or more topics. Pools: All / New / Missed. Source filter: 2025, 2022, or examiner notes & aftercare. |
 | **Question bank** | All 197 case questions plus 63 theory questions from the past-paper booklet, practice doc, CL orals study doc, slide exam notes and Lily's commonly-asked list, filterable by topic, searchable, with model answers and Got it / Review again marks. |
-| **Rx lab** | Calculator (both meridians, any BVD, nasal-torque axis rounding, spherical-equivalent compromise), a random-Rx conversion drill, and a LARS helper. |
+| **Rx lab** | Calculator (both meridians, any BVD, nasal-torque axis rounding, spherical-equivalent compromise), a random-Rx conversion drill, a LARS helper, and a step-by-step guide to vertexing and converting a spectacle Rx (worked example, 12 mm quick-reference table, common slips). Values typed here and in the lens finder are remembered across tabs and reloads. |
 | **Lens guide** | Parameters for the lenses that come up in the orals, a "will it fit?" checker for a CL Rx, care systems and RGP materials. |
 | **Fact check** | Claims in the student notes that were wrong or out of date, with the correction and sources. |
 
@@ -26,6 +26,7 @@ Case categories add **Aftercare & complications** (tight lens, SEAL, SLK, red ey
 
 ```
 index.html            page shell and navigation
+img/                  favicon (SVG + PNG fallbacks) and Apple touch icon
 css/styles.css        all styling (light and dark theme tokens at the top)
 js/data-lenses.js     lens parameters, solutions, RGP materials, fact-check list, sources
 js/data-theory.js     past-paper theory questions
