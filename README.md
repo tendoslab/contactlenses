@@ -8,8 +8,8 @@ Open `index.html` in a browser. There is no build step and no server needed. Pro
 
 | Page | What it does |
 |---|---|
-| **Oral simulator** | 34 cases: 21 rebuilt from the 2022 and 2025 orals, 8 from the 5th-year examiner question lists (Michael, Judy, Lily, Eric) and 5 aftercare/complication cases from the orals study doc and slide notes. *Full cases* mode runs each case in exam order (history → convert Rx → pick one lens → justify → fit → complications → lifestyle twist → care → plan B). *Topic drill* mode mixes single questions from one or more topics. Pools: All / New / Missed. Source filter: 2025, 2022, or examiner notes & aftercare. |
-| **Question bank** | All 197 case questions plus 63 theory questions from the past-paper booklet, practice doc, CL orals study doc, slide exam notes and Lily's commonly-asked list, filterable by topic, searchable, with model answers and Got it / Review again marks. |
+| **Oral simulator** | 37 cases: 21 rebuilt from the 2022 and 2025 orals, 8 from the 5th-year examiner question lists (Michael, Judy, Lily, Eric), 5 aftercare/complication cases from the orals study doc and slide notes, 2 cases built on the scripts in the practice doc, and a slide round from the slide exam notes. *Full cases* mode runs each case in exam order (history → convert Rx → pick one lens → justify → fit → complications → lifestyle twist → care → plan B). *Topic drill* mode mixes single questions from one or more topics. Pools: All / New / Missed. Source filter: 2025, 2022, or notes, practice doc & slides. |
+| **Question bank** | All 221 case questions plus 93 theory questions from the past-paper booklet, practice doc, CL orals study doc, slide exam notes, Lily's commonly-asked list and the 2022/2025 orals notes, filterable by topic, searchable, with model answers and Got it / Review again marks. |
 | **Rx lab** | Calculator (both meridians, any BVD, nasal-torque axis rounding, spherical-equivalent compromise), a random-Rx conversion drill, a LARS helper, and a step-by-step guide to vertexing and converting a spectacle Rx (worked example, 12 mm quick-reference table, common slips). Values typed here and in the lens finder are remembered across tabs and reloads. |
 | **Lens guide** | Parameters for the lenses that come up in the orals, a "will it fit?" checker for a CL Rx, care systems and RGP materials. |
 | **Fact check** | Claims in the student notes that were wrong or out of date, with the correction and sources. |
@@ -33,6 +33,8 @@ js/data-theory.js     past-paper theory questions
 js/cases-2025.js      cases from the 2025 orals
 js/cases-2022.js      cases from the 2022 orals
 js/cases-notes.js     cases from the examiner question lists and aftercare notes
+js/cases-practice.js  cases from the practice doc scripts and a slide round from the slide exam notes
+CL orals/             the source past papers, orals notes and study documents
 js/app.js             simulator, question bank, Rx lab, lens guide, fact check
 ```
 

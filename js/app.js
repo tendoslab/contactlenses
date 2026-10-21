@@ -1,5 +1,5 @@
 /* CL Orals Lab: app logic. No build step, no framework.
- * Data comes from data-lenses.js, data-theory.js, cases-2025.js, cases-2022.js. */
+ * Data comes from data-lenses.js, data-theory.js and the cases-*.js files. */
 (() => {
   'use strict';
 
@@ -307,7 +307,7 @@
           <div>
             <p class="label">Source</p>
             <div class="row" style="gap:.4rem">
-              ${[['all', 'All sources'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Examiner notes & aftercare']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
+              ${[['all', 'All sources'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Notes, practice doc & slides']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
             </div>
           </div>
           <div>
