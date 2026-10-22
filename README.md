@@ -44,6 +44,8 @@ Copy any case object in `js/cases-2025.js` and edit it. Each step needs `phase`,
 
 - `mcq`: `options` and `answer` (index of the best option)
 - `multi`: `options` and `answers` (all correct indices) for "what else?" questions
+
+For `mcq` and `multi`, add `why: { <index>: 'one line on why this option is wrong' }` for every wrong option. The notes show under each option in the simulator feedback and as "Why the other options are wrong" in the question bank.
 - `rx`: `accept: { R: { sph: [...], cyl: [...], axis: [...] }, L: {...} }`; optional `from` if the step works from a different spectacle Rx (e.g. a monovision near Rx)
 - `match`: `rows: [{ label, options, answer }]`
 - `open`: say the answer aloud, reveal the model answer, mark yourself

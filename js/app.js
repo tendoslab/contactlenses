@@ -414,6 +414,11 @@
       <section class="card qcard"><h2>${esc(st.q)}</h2>${body}</section></div>`;
   }
 
+  // Why a wrong option is wrong (st.why is keyed by option index; correct options have no entry).
+  function whyNote(st, oi) {
+    return st.why && st.why[oi] ? `<span class="why">${esc(st.why[oi])}</span>` : '';
+  }
+
   function viewFeedback() {
     const it = cur(), c = it.c, st = curStep(), L = sim.last;
     const head = { good: ['✓', 'Correct'], part: ['½', 'Partly right'], bad: ['✕', 'Not quite'] }[L.outcome];
@@ -422,14 +427,14 @@
     if (st.type === 'mcq') {
       detail = `<div class="opts">${sim.perm.map((oi) => {
         const cls = oi === st.answer ? 'right' : oi === L.detail.pick ? 'wrong' : '';
-        return `<div class="opt ${cls}"><span class="dot" aria-hidden="true"></span><span>${esc(st.options[oi])}</span></div>`;
+        return `<div class="opt ${cls}"><span class="dot" aria-hidden="true"></span><span>${esc(st.options[oi])}${whyNote(st, oi)}</span></div>`;
       }).join('')}</div>`;
     } else if (st.type === 'multi') {
       const want = new Set(st.answers), got = new Set(L.detail.picked);
       detail = `<div class="opts">${sim.perm.map((oi) => {
         const cls = want.has(oi) ? 'right' : got.has(oi) ? 'wrong' : '';
         const note = want.has(oi) && !got.has(oi) ? ' <span class="pill bad">missed</span>' : !want.has(oi) && got.has(oi) ? ' <span class="pill bad">shouldn\'t pick</span>' : '';
-        return `<div class="opt box ${cls}"><span class="dot" aria-hidden="true"></span><span>${esc(st.options[oi])}${note}</span></div>`;
+        return `<div class="opt box ${cls}"><span class="dot" aria-hidden="true"></span><span>${esc(st.options[oi])}${note}${whyNote(st, oi)}</span></div>`;
       }).join('')}</div>`;
     } else if (st.type === 'rx') {
       const src = st.from || c.spec;
@@ -487,10 +492,16 @@
     if (saved.missed[it.key]) return 'missed';
     return '';
   }
+  function wrongOptionsHTML(st) {
+    if (!st.why) return '';
+    const items = Object.keys(st.why).map((oi) => `<li><span class="muted">${esc(st.options[oi])}</span>${whyNote(st, oi)}</li>`).join('');
+    return `<div><p class="label">Why the other options are wrong</p><ul class="answer-list wrong-list">${items}</ul></div>`;
+  }
+
   function correctAnswerHTML(st) {
     if (!st) return '';
-    if (st.type === 'mcq') return `<div><p class="label">Best answer</p><p>${esc(st.options[st.answer])}</p></div>`;
-    if (st.type === 'multi') return `<div><p class="label">Correct selections</p><ul class="answer-list">${st.answers.map((a) => `<li>${esc(st.options[a])}</li>`).join('')}</ul></div>`;
+    if (st.type === 'mcq') return `<div><p class="label">Best answer</p><p>${esc(st.options[st.answer])}</p></div>${wrongOptionsHTML(st)}`;
+    if (st.type === 'multi') return `<div><p class="label">Correct selections</p><ul class="answer-list">${st.answers.map((a) => `<li>${esc(st.options[a])}</li>`).join('')}</ul></div>${wrongOptionsHTML(st)}`;
     if (st.type === 'match') return `<div class="tablewrap"><table class="t">${st.rows.map((r) => `<tr><td><b>${esc(r.label)}</b></td><td>${esc(r.options[r.answer])}</td></tr>`).join('')}</table></div>`;
     if (st.type === 'rx') return `<div><p class="label">Accepted CL Rx</p><div class="pad">${['R', 'L'].map((e) => `<div><span class="eye">${e}</span>${st.accept[e].sph.map((x) => D(x)).join(' or ')}${st.accept[e].axis.length ? ` / ${st.accept[e].cyl.map((x) => D(x)).join(' or ')} × ${st.accept[e].axis.join(' or ')}` : ' DS'}</div>`).join('')}</div></div>`;
     return '';
