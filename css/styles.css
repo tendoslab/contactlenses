@@ -198,6 +198,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .opt[aria-pressed="true"] .dot { background: var(--accent); border-color: var(--accent); }
 .opt.right { border-color: var(--good); background: var(--good-soft); }
 .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt .why, .wrong-list .why { display: block; margin-top: .35rem; font-size: .9rem; color: var(--ink); }
+.opt .why::before, .wrong-list .why::before { content: "Why not: "; font-weight: 700; color: var(--bad); }
+.wrong-list li + li { margin-top: .5rem; }
 .rxgrid { display: grid; grid-template-columns: 1.6rem repeat(3, minmax(0, 1fr)); gap: .4rem; align-items: end; }
 .rxgrid .eye { font-family: var(--font-mono); font-weight: 700; color: var(--muted); padding-bottom: .55rem; }
 .signed { position: relative; display: block; min-width: 0; }
