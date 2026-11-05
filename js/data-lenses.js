@@ -184,15 +184,15 @@ const LENSES = [
 ];
 
 const SOLUTIONS = [
-  { name: 'Opti-Free PureMoist (Alcon)', kind: 'MPS (soft)', actives: 'Polyquad (polyquaternium-1) 0.001% + Aldox (myristamidopropyl dimethylamine) 0.0006%; HydraGlyde wetting agent', soak: '≥6 h', notes: 'Aldox gives some activity against Acanthamoeba trophozoites and fungi. It does NOT reliably kill cysts. Rub and rinse each side before storing.' },
-  { name: 'Biotrue multi-purpose (B+L)', kind: 'MPS (soft)', actives: 'Polyquaternium-1 + PHMB (polyaminopropyl biguanide)', soak: '≥4 h', notes: 'Biguanide-based. PHMB has been linked to solution-induced corneal staining (SICS) with some lens/solution pairings.' },
-  { name: 'ReNu MultiPlus (B+L)', kind: 'MPS (soft)', actives: 'PHMB (Dymed)', soak: '≥4 h', notes: 'Classic SICS example with some SiHy lenses.' },
-  { name: 'AOSEPT Plus with HydraGlyde (Alcon)', kind: 'One-step H₂O₂ (soft and RGP)', actives: '3% hydrogen peroxide, platinum-disc neutraliser', soak: '≥6 h to neutralise', notes: 'Preservative-free, no rub step needed. Never rinse lenses with it or put it in the eye. Not for shift workers or anyone who might pull lenses out early. Use only the case supplied, which has the disc.' },
-  { name: 'One-step catalase-tablet H₂O₂ (e.g. Oxysept 1-Step)', kind: 'One-step H₂O₂', actives: '3% hydrogen peroxide + catalase tablet', soak: '≥6 h', notes: 'Tablet neutraliser; some versions have a colour indicator. Check current Australian availability before naming it.' },
-  { name: 'Menicare Plus (Menicon)', kind: 'MPS (RGP)', actives: 'Multipurpose RGP solution', soak: 'Per insert', notes: 'Simple one-bottle RGP care; good for convenience or travel.' },
-  { name: 'Boston Advance cleaner + conditioning solution (B+L)', kind: 'Two-bottle RGP system', actives: 'Abrasive surfactant cleaner + preserved conditioning/storage solution', soak: 'Per insert', notes: 'RGP only. Soft lenses absorb the preservatives (toxicity) and the abrasive cleaner can damage them.' },
-  { name: 'Boston Simplus (B+L)', kind: 'MPS (RGP)', actives: 'Multipurpose RGP solution', soak: 'Per insert', notes: 'One-bottle RGP alternative to Advance.' },
-  { name: 'Menicon Progent', kind: 'Periodic RGP protein remover', actives: 'Progent A sodium hypochlorite + Progent B potassium bromide', soak: '30 min', notes: 'Every 2 weeks (no more often than every 5 days). Restores wettability and removes stubborn protein.' },
+  { use: 'soft', name: 'Opti-Free PureMoist (Alcon)', kind: 'MPS (soft)', actives: 'Polyquad (polyquaternium-1) 0.001% + Aldox (myristamidopropyl dimethylamine) 0.0006%; HydraGlyde wetting agent', soak: '≥6 h', notes: 'Aldox gives some activity against Acanthamoeba trophozoites and fungi. It does NOT reliably kill cysts. Rub and rinse each side before storing.' },
+  { use: 'soft', name: 'Biotrue multi-purpose (B+L)', kind: 'MPS (soft)', actives: 'Polyquaternium-1 + PHMB (polyaminopropyl biguanide)', soak: '≥4 h', notes: 'Biguanide-based. PHMB has been linked to solution-induced corneal staining (SICS) with some lens/solution pairings.' },
+  { use: 'soft', name: 'ReNu MultiPlus (B+L)', kind: 'MPS (soft)', actives: 'PHMB (Dymed)', soak: '≥4 h', notes: 'Classic SICS example with some SiHy lenses.' },
+  { use: 'both', name: 'AOSEPT Plus with HydraGlyde (Alcon)', kind: 'One-step H₂O₂ (soft and RGP)', actives: '3% hydrogen peroxide, platinum-disc neutraliser', soak: '≥6 h to neutralise', notes: 'Preservative-free, no rub step needed. Never rinse lenses with it or put it in the eye. Not for shift workers or anyone who might pull lenses out early. Use only the case supplied, which has the disc.' },
+  { use: 'soft', name: 'One-step catalase-tablet H₂O₂ (e.g. Oxysept 1-Step)', kind: 'One-step H₂O₂', actives: '3% hydrogen peroxide + catalase tablet', soak: '≥6 h', notes: 'Tablet neutraliser; some versions have a colour indicator. Check current Australian availability before naming it.' },
+  { use: 'rgp', name: 'Menicare Plus (Menicon)', kind: 'MPS (RGP)', actives: 'Multipurpose RGP solution', soak: 'Per insert', notes: 'Simple one-bottle RGP care; good for convenience or travel.' },
+  { use: 'rgp', name: 'Boston Advance cleaner + conditioning solution (B+L)', kind: 'Two-bottle RGP system', actives: 'Abrasive surfactant cleaner + preserved conditioning/storage solution', soak: 'Per insert', notes: 'RGP only. Soft lenses absorb the preservatives (toxicity) and the abrasive cleaner can damage them.' },
+  { use: 'rgp', name: 'Boston Simplus (B+L)', kind: 'MPS (RGP)', actives: 'Multipurpose RGP solution', soak: 'Per insert', notes: 'One-bottle RGP alternative to Advance.' },
+  { use: 'rgp', name: 'Menicon Progent', kind: 'Periodic RGP protein remover', actives: 'Progent A sodium hypochlorite + Progent B potassium bromide', soak: '30 min', notes: 'Every 2 weeks (no more often than every 5 days). Restores wettability and removes stubborn protein.' },
 ];
 
 const RGP_MATERIALS = [
@@ -203,6 +203,100 @@ const RGP_MATERIALS = [
   { name: 'Boston XO2', family: 'Fluorosilicone acrylate (hyper-Dk)', dk: '141', notes: 'Higher Dk, used for overnight (e.g. Ortho-K) and thick designs. Higher-Dk materials are generally softer and less dimensionally stable, so flexure and scratching become concerns.' },
   { name: 'Menicon Z', family: 'Fluorosilicone methacrylate (hyper-Dk)', dk: '163 (ISO) / 189 (Fatt)', notes: 'Hyper-Dk. Plasma-treated surface for wettability.' },
 ];
+
+/* Rigid lens designs, shown as cards in the Rigid lenses part of the lens guide. */
+const RGP_DESIGNS = [
+  { name: 'Spherical corneal RGP', group: 'Corneal',
+    when: 'Spherical Rx, or corneal cyl up to about 2 D with little residual cyl. First choice for WTR corneal astigmatism the soft torics struggle with.',
+    fit: 'Tricurve or aspheric back. BOZR from flat K by toricity (see the table below). TD ≈ HVID − 2 (usually 9.2–9.6). BOZD about 1 mm bigger than the dim-light pupil.',
+    stab: 'Rotation doesn\'t matter; the tear lens masks the corneal cyl.',
+    watch: 'Above ~2 D of corneal cyl it rocks along the flat meridian, decentres and gives 3 & 9 staining. Spherical RGPs decentre laterally on ATR corneas. Flexure leaves residual cyl.' },
+  { name: 'Front-surface toric RGP', group: 'Toric',
+    when: 'Spherical (or near-spherical) cornea with internal (lenticular) cyl, so a spherical RGP leaves residual cyl.',
+    fit: 'Spherical back fitted like a spherical RGP. Cyl on the front, found by over-refraction over a spherical trial lens.',
+    stab: 'Spherical back has nothing to lock onto, so it needs 1–1.5Δ base-down prism, ± truncation.',
+    watch: 'Thicker and heavier: rides low, less oxygen, prism can be noticed. A soft toric is usually the easier answer.' },
+  { name: 'Back-surface toric (BST)', group: 'Toric',
+    when: 'Corneal cyl ≥ 2 D and refractive cyl about 1.2–1.4 × the corneal cyl (residual in the same direction as the corneal cyl).',
+    fit: 'Both back curves from the Ks with Mandell–Moore factors. Spherical front.',
+    stab: 'The toric back locks onto the toric cornea.',
+    watch: 'Index mismatch between lens and tears induces cyl of about 0.45–0.5 × the back-surface toricity. That only works if it matches the residual cyl.' },
+  { name: 'SPE bitoric', group: 'Toric',
+    when: 'Corneal cyl ≥ 2 D and refractive cyl ≈ corneal cyl (no residual).',
+    fit: 'Mandell–Moore BOZRs. Front cyl corrects only the induced cyl, so the lens behaves like a sphere.',
+    stab: 'Spherical power effect: rotation doesn\'t change the optics.',
+    watch: 'Order by meridian (BOZR and BVP in each); the lab works out the front surface.' },
+  { name: 'CPE bitoric', group: 'Toric',
+    when: 'Corneal cyl ≥ 2 D and refractive cyl ≠ corneal cyl (residual cyl that a BST can\'t cover).',
+    fit: 'Mandell–Moore BOZRs. Front cyl corrects induced + residual cyl.',
+    stab: 'Cylinder power effect: relies on the toric back staying locked, so rotation blurs.',
+    watch: 'Check rotation at the fit. Over-refract with the trial bitoric on.' },
+  { name: 'Keratoconus corneal designs (e.g. Rose K2)', group: 'Specialty',
+    when: 'Mild to moderate, central or near-central cones; irregular astigmatism a soft lens can\'t correct.',
+    fit: 'Smaller optic zones, steeper central and flatter peripheral curves than a standard tricurve. Aim for light three-point touch. Fit from the manufacturer\'s trial set and guide.',
+    stab: 'Rigid optic replaces the irregular front surface; the tear lens fills the gaps.',
+    watch: 'Apical touch on the cone → scarring risk. Low or decentred cones and RGP intolerance → scleral, hybrid or piggyback.', confirm: true },
+  { name: 'Scleral / mini-scleral', group: 'Specialty',
+    when: 'Advanced or decentred keratoconus, pellucid, post-graft, severe ocular surface disease, RGP intolerance, rigid optics for sport.',
+    fit: 'Vaults the cornea and limbus and lands on the sclera. Fill the bowl with preservative-free saline; check central and limbal clearance and the landing zone.',
+    stab: 'Lands on the sclera, so it is very stable and rarely dislodges.',
+    watch: 'Hypoxia (little tear exchange), midday fogging, seal-off and conjunctival blanching at the landing zone, limbal stress. Use hyper-Dk material.' },
+  { name: 'Ortho-K (reverse geometry)', group: 'Specialty',
+    when: 'Low to moderate myopia (usually up to about −4.00 D; some designs go further) with little corneal cyl, and myopia control in children.',
+    fit: 'Flat central BOZR, steeper reverse curve, alignment and edge curves. Fitted from topography; judged by the bull\'s-eye treatment zone on post-wear topography.',
+    stab: 'Worn overnight; centration is everything (decentred "smiley face"/central island patterns mean refit).',
+    watch: 'Overnight wear of a rigid lens: MK risk higher than daily-wear RGP, so strict hygiene, no tap water, hyper-Dk material.' },
+  { name: 'Hybrid / piggyback', group: 'Specialty',
+    when: 'Needs rigid optics but can\'t tolerate a corneal RGP, or the RGP won\'t centre.',
+    fit: 'Hybrid: rigid centre with a soft skirt. Piggyback: high-Dk SiHy soft lens under a corneal RGP.',
+    stab: 'The soft skirt or carrier lens centres the rigid optic.',
+    watch: 'Two lenses (piggyback) = more handling, care and lower oxygen. Hybrids can tighten and the junction can tear.' },
+];
+
+/* RGP fitting quick reference. */
+const RGP_FIT = {
+  start: [
+    ['Total diameter (TD)', '≈ HVID − 2 mm, usually 9.2–9.6. Bigger for a wide aperture or lid attachment.'],
+    ['BOZD', '≈ dim-light pupil + 1 mm: pupil < 5 mm → 7.6, 5–7 mm → 7.8, > 7 mm → 8.0.'],
+    ['Peripheral curves', 'Flatter outwards (bigger mm): SCR ≈ BOZR + 1 mm, PCR ≈ SCR + 2 mm. Aim for a 0.4–0.5 mm edge band.'],
+    ['Centre thickness', 'About 0.15 mm for low minus. Thicker for plus and high-Dk materials; lenticulate high plus and high minus.'],
+  ],
+  bozr: [
+    ['< 0.50 D', 'On flat K'],
+    ['0.50–1.00 D', 'On K or 0.25 D steeper'],
+    ['Over 1.00, under 2.00 D', '0.50 D steeper than flat K'],
+    ['2.00 D or more', 'ΔK/3 steeper if you stay spherical, but think BST or bitoric'],
+  ],
+  mandell: [
+    ['2.0 D', '0.25 D flatter', '0.50 D flatter'],
+    ['3.0 D', '0.25 D flatter', '0.75 D flatter'],
+    ['4.0 D', '0.25 D flatter', '1.00 D flatter'],
+    ['5.0 D', '0.25 D flatter', '1.25 D flatter'],
+  ],
+  patterns: [
+    ['Alignment', 'Thin, even film centrally and mid-periphery; 0.4–0.5 mm bright edge band.', 'The target.'],
+    ['Steep (apical clearance)', 'Central pooling, maybe a bubble; dark mid-peripheral touch ring.', 'Flatten the BOZR (or reduce BOZD).'],
+    ['Flat (apical touch)', 'Dark central touch with wide peripheral pooling; lens rocks and decentres.', 'Steepen the BOZR (or enlarge BOZD/TD).'],
+    ['WTR cornea, spherical lens', 'Horizontal band of touch at 3 and 9 (the flat meridian), pooling at 12 and 6.', 'Normal up to ~2 D. More than that → BST or bitoric.'],
+    ['ATR cornea, spherical lens', 'Vertical band of touch, pooling at 3 and 9; lens decentres laterally.', 'Consider a soft toric or toric RGP.'],
+    ['Tight edge (low edge lift)', 'Thin or absent edge band, little tear exchange, possible seal-off and indentation.', 'Flatten the peripheral curves.'],
+    ['Loose edge (high edge lift)', 'Wide, bright edge band, bubbles under the edge, lens awareness, may fall out.', 'Steepen the peripheral curves.'],
+  ],
+  adjust: [
+    ['Total diameter', '↑', '↓'],
+    ['BOZD', '↑', '↓'],
+    ['BOZR', '↓ (steeper)', '↑ (flatter)'],
+    ['Peripheral radii', '↓', '↑'],
+    ['Thickness', '↓', '↑'],
+  ],
+  rules: [
+    ['mm ↔ D', 'K (D) = 337.5 / r (mm). Around 7.80 mm, 0.05 mm ≈ 0.25 D.'],
+    ['Tear lens (SAM-FAP)', 'Steeper than K → plus tear lens → Add Minus to the lens. Flatter → minus tear lens → Add Plus. About 0.25 D per 0.05 mm.'],
+    ['BVP', 'Vertex the spectacle Rx to the cornea first (both meridians), then correct for the tear lens.'],
+    ['Changing BOZD', 'Keep the same fit: every 0.5 mm change in BOZD needs a 0.05 mm change in BOZR in the same direction (bigger zone → flatter BOZR).'],
+    ['Residual cyl', 'Refractive cyl at the cornea minus corneal cyl. It is what a spherical RGP leaves uncorrected.'],
+  ],
+};
 
 /* What students wrote vs what is actually right. Shown on the Fact check page. */
 const FACTCHECK = [

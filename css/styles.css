@@ -267,6 +267,13 @@ svg.cross text.sub { fill: var(--muted); }
 .lens dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .15rem .7rem; margin: .3rem 0; font-size: .9rem; }
 .lens dt { color: var(--muted); }
 .lens dd { margin: 0; font-family: var(--font-mono); font-size: .85rem; }
+.lens dd.prose { font-family: inherit; font-size: .9rem; }
+.kind-switch { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 32rem; margin: 0 0 1.5rem; }
+.kind-switch button { color: var(--ink); }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.rgp-sum { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .2rem .8rem; margin: 0; font-size: .92rem; }
+.rgp-sum dt { color: var(--muted); }
+.rgp-sum dd { margin: 0; font-family: var(--font-mono); font-size: .88rem; }
 .finder { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 @media (max-width: 640px) { .finder { grid-template-columns: minmax(0, 1fr); } }
 .fit-list { display: flex; flex-direction: column; gap: .3rem; }

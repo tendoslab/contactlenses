@@ -47,7 +47,7 @@
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch (e) { /* ignore */ } };
   // Values typed into the Rx lab and lens finder survive switching tabs and reloading.
   const FIELDS_KEY = STORE_KEY + ':fields';
-  const KEEP = /^[clf]-/;
+  const KEEP = /^[clfg]-/;
   let fields = {};
   try { fields = JSON.parse(localStorage.getItem(FIELDS_KEY)) || {}; } catch (e) { /* storage unavailable */ }
   function restoreFields() {
@@ -734,14 +734,22 @@
   }
 
   // ------------------------------------------------------------------ lens guide
-  const lensView = { modality: 'all', type: 'all' };
+  const lensView = { modality: 'all', type: 'all', kind: 'soft', group: 'all' };
+  try { if (localStorage.getItem(STORE_KEY + ':lenskind') === 'rigid') lensView.kind = 'rigid'; } catch (e) { /* ignore */ }
+  const kindSwitch = () => `<div class="seg kind-switch" role="group" aria-label="Lens family">
+      <button data-act="lens-kind" data-v="soft" aria-pressed="${lensView.kind === 'soft'}">Soft lenses<small>${LENSES.length} lenses · care</small></button>
+      <button data-act="lens-kind" data-v="rigid" aria-pressed="${lensView.kind === 'rigid'}">Rigid lenses (RGP)<small>designs · fitting · materials</small></button></div>`;
+  const careTable = (list) => `<div class="tablewrap"><table class="t"><tr><th>Product</th><th>Type</th><th>Actives</th><th>Soak</th><th>Notes</th></tr>
+      ${list.map((s) => `<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.kind)}</td><td>${esc(s.actives)}</td><td class="mono">${esc(s.soak)}</td><td>${esc(s.notes)}</td></tr>`).join('')}</table></div>`;
   function renderLenses() {
+    if (lensView.kind === 'rigid') { renderRigid(); return; }
     const mods = ['all', 'Daily', 'Two-weekly', 'Monthly'], types = ['all', 'Toric', 'Toric multifocal', 'Sphere'];
     const list = LENSES.filter((l) => (lensView.modality === 'all' || l.modality === lensView.modality) && (lensView.type === 'all' || l.type === lensView.type));
     const sphTxt = (l) => `${D(l.sph.max)} to ${D(l.sph.min)}${l.sph.fine ? ` (0.50 steps beyond ±${l.sph.fine.toFixed(2)})` : ''}`;
     view.innerHTML = `<div class="fade">
     <section class="hero"><div><p class="label">Lens guide · Australia</p><h1>Know the ranges before you are asked</h1>
     <p>Parameters for the lenses that come up in the orals, checked October 2026. <span class="pill warn">confirm</span> marks figures to double-check against the current Australian fitting guide.</p></div></section>
+    ${kindSwitch()}
     <section class="card stack" style="margin-bottom:1.5rem">
       <h2 style="font-size:1.15rem">Will it fit? Enter the CL Rx (after vertexing)</h2>
       <div class="finder">${['R', 'L'].map((e) => `<div><p class="label">${e === 'R' ? 'Right' : 'Left'} eye</p><div class="inputs-4" style="grid-template-columns:repeat(3,minmax(0,1fr))">
@@ -760,12 +768,121 @@
       ${l.type !== 'Sphere' ? `<dt>Cyl</dt><dd>${l.cyl.map((x) => D(x)).join(', ')}</dd><dt>Axes</dt><dd>${l.axisStep}° steps</dd>` : ''}
       <dt>Stabilisation</dt><dd>${esc(l.stab)}</dd><dt>Overnight</dt><dd>${esc(l.ew)}</dd></dl>
       ${l.notes ? `<p class="muted" style="font-size:.9rem;margin:0">${esc(l.notes)}</p>` : ''}</article>`).join('')}</div>
-    <section style="margin-top:2rem" class="stack"><h2>Care systems</h2><div class="tablewrap"><table class="t"><tr><th>Product</th><th>Type</th><th>Actives</th><th>Soak</th><th>Notes</th></tr>
-      ${SOLUTIONS.map((s) => `<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.kind)}</td><td>${esc(s.actives)}</td><td class="mono">${esc(s.soak)}</td><td>${esc(s.notes)}</td></tr>`).join('')}</table></div></section>
-    <section style="margin-top:2rem" class="stack"><h2>RGP materials</h2><div class="tablewrap"><table class="t"><tr><th>Material</th><th>Family</th><th>Dk</th><th>Notes</th></tr>
-      ${RGP_MATERIALS.map((m) => `<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.family)}</td><td class="mono">${esc(m.dk)}</td><td>${esc(m.notes)}</td></tr>`).join('')}</table></div></section>
+    <section style="margin-top:2rem" class="stack"><h2>Soft lens care systems</h2>${careTable(SOLUTIONS.filter((x) => x.use !== 'rgp'))}
+      <p class="muted" style="margin:0">RGP solutions and materials are under <button class="linkbtn" data-act="lens-kind" data-v="rigid">Rigid lenses</button>.</p></section>
     </div>`;
     restoreFields(); finder();
+  }
+
+  // Rigid lenses: starting-lens calculator, designs, fitting reference, materials and care.
+  function renderRigid() {
+    const groups = ['all', ...new Set(RGP_DESIGNS.map((d) => d.group))];
+    const list = RGP_DESIGNS.filter((d) => lensView.group === 'all' || d.group === lensView.group);
+    const GROUP_HUE = { Corneal: 275, Toric: 225, Specialty: 160 };
+    const tbl = (head, rows) => `<div class="tablewrap"><table class="t"><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr>${rows.map((r) => `<tr>${r.map((c, i) => `<td>${i ? esc(c) : `<b>${esc(c)}</b>`}</td>`).join('')}</tr>`).join('')}</table></div>`;
+    const inp = (id, label, val) => `<div class="field"><label for="${id}">${label}</label><input type="text" id="${id}" value="${val}"></div>`;
+    view.innerHTML = `<div class="fade">
+    <section class="hero"><div><p class="label">Lens guide · Rigid lenses</p><h1>Pick the rigid design from the Ks and the Rx</h1>
+    <p>Corneal cyl, residual cyl and the tear lens decide the design. Work out a starting lens, then check it against the designs, fluorescein patterns and materials below.</p></div></section>
+    ${kindSwitch()}
+    <section class="card stack" style="margin-bottom:1.5rem">
+      <h2 style="font-size:1.15rem">Starting lens from the Ks and the spectacle Rx</h2>
+      <div class="finder">
+        <div><p class="label">Keratometry (D or mm)</p><div class="inputs-4" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+          ${inp('g-k1', 'K1', '42.50')}${inp('g-k1a', 'K1 meridian', '180')}${inp('g-k2', 'K2 (90° away)', '44.25')}</div></div>
+        <div><p class="label">Spectacle Rx (12 mm)</p><div class="inputs-4" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+          ${inp('g-s', 'Sphere', '-4.50')}${inp('g-c', 'Cyl', '-2.00')}${inp('g-a', 'Axis', '180')}</div></div>
+      </div>
+      <div id="rgp-out"></div>
+    </section>
+    <h2>Designs</h2>
+    <div class="row" style="gap:.4rem;margin:.6rem 0 1rem">${groups.map((g) => `<button class="chip" data-act="rgp-group" data-v="${g}" aria-pressed="${lensView.group === g}">${g === 'all' ? 'All designs' : g}</button>`).join('')}</div>
+    <div class="lens-grid">${list.map((d) => `<article class="card lens hue-top" style="--h:${GROUP_HUE[d.group] ?? 275}">
+      <div class="row" style="gap:.35rem"><span class="pill tint">${esc(d.group)}</span>${d.confirm ? '<span class="pill warn">confirm</span>' : ''}</div>
+      <h3>${esc(d.name)}</h3>
+      <dl><dt>When</dt><dd class="prose">${esc(d.when)}</dd><dt>Fitting</dt><dd class="prose">${esc(d.fit)}</dd><dt>Stability</dt><dd class="prose">${esc(d.stab)}</dd></dl>
+      <p class="muted" style="font-size:.9rem;margin:0"><b>Watch for:</b> ${esc(d.watch)}</p></article>`).join('')}</div>
+    <h2 style="margin-top:2rem">Fitting reference</h2>
+    <div class="lab-grid" style="margin-top:.8rem">
+      <section class="card stack"><h3>Starting parameters</h3>${tbl(['Parameter', 'Rule of thumb'], RGP_FIT.start)}</section>
+      <section class="card stack"><h3>Spherical RGP: BOZR by corneal toricity</h3>${tbl(['Corneal cyl', 'BOZR'], RGP_FIT.bozr)}</section>
+      <section class="card stack"><h3>Bitoric / BST: Mandell–Moore</h3>${tbl(['Corneal cyl', 'Flat meridian', 'Steep meridian'], RGP_FIT.mandell)}
+        <p class="muted" style="margin:0;font-size:.9rem">Each BOZR is relative to its own K. Round the toricity to the nearest row.</p></section>
+      <section class="card stack"><h3>Tighten or loosen</h3>${tbl(['Change', 'Tighten', 'Loosen'], RGP_FIT.adjust)}
+        <p class="muted" style="margin:0;font-size:.9rem">Typical steps: BOZR 0.05 mm, TD/BOZD 0.2–0.5 mm.</p></section>
+      <section class="card stack"><h3>Optics to say out loud</h3>${tbl(['Rule', ''], RGP_FIT.rules)}</section>
+    </div>
+    <section class="card stack" style="margin-top:1rem"><h3>Fluorescein patterns</h3>${tbl(['Pattern', 'What you see', 'What to do'], RGP_FIT.patterns)}
+      <p class="muted" style="margin:0;font-size:.9rem">Cobalt blue with a Wratten filter, after the lens has settled and is centred. Judge the fit dynamically first (centration, movement 1–2 mm with the blink, lid attachment), then statically.</p></section>
+    <section style="margin-top:2rem" class="stack"><h2>RGP materials</h2>${tbl(['Material', 'Family', 'Dk', 'Notes'], RGP_MATERIALS.map((m) => [m.name, m.family, m.dk, m.notes]))}</section>
+    <section style="margin-top:2rem" class="stack"><h2>RGP care systems</h2>${careTable(SOLUTIONS.filter((x) => x.use !== 'soft'))}</section>
+    </div>`;
+    restoreFields(); rgpCalc();
+  }
+
+  /* Starting RGP from Ks + spectacle Rx. Residual cyl uses power vectors so oblique cases work. */
+  const rad = (deg) => (deg * Math.PI) / 180;
+  const toVec = (c, a) => [(-c / 2) * Math.cos(2 * rad(a)), (-c / 2) * Math.sin(2 * rad(a))];
+  const fromVec = ([j0, j45]) => [-2 * Math.hypot(j0, j45), normAxis((Math.atan2(j45, j0) * 180) / Math.PI / 2)];
+  const axisGap = (a, b) => { const d = Math.abs(normAxis(a) - normAxis(b)) % 180; return Math.min(d, 180 - d); };
+  function rgpCalc() {
+    const out = document.getElementById('rgp-out');
+    if (!out) return;
+    const g = (id) => parseNum(document.getElementById(id).value);
+    let k1 = g('g-k1'), k2 = g('g-k2'), k1a = g('g-k1a'), s = g('g-s'), c = g('g-c'), a = g('g-a');
+    if ([k1, k2, s].some(Number.isNaN) || k1 <= 0 || k2 <= 0) { out.innerHTML = '<p class="no">Enter both Ks and a sphere.</p>'; return; }
+    if (Number.isNaN(k1a)) k1a = 180;
+    if (Number.isNaN(c)) c = 0;
+    if (Number.isNaN(a)) a = 180;
+    if (c > 0) { s += c; c = -c; a += 90; }
+    a = normAxis(a);
+    const toD = (k) => (k < 20 ? 337.5 / k : k);
+    let kf = toD(k1), ks = toD(k2), F = normAxis(k1a);
+    if (kf > ks) { [kf, ks] = [ks, kf]; F = normAxis(F + 90); }
+    const dK = ks - kf;
+    // Ocular (corneal-plane) Rx, then power in any meridian.
+    const so = vtx(s), oc = vtx(s + c) - so;
+    const pm = (m) => so + oc * Math.sin(rad(m - a)) ** 2;
+    const [resC, resA] = fromVec(toVec(oc, a).map((x, i) => x - toVec(-dK, F)[i]));
+    const resMag = Math.abs(resC);
+    const kind = dK < 0.25 ? 'spherical' : axisGap(F, 180) <= 30 ? 'WTR' : axisGap(F, 90) <= 30 ? 'ATR' : 'oblique';
+    const mm = (d) => Math.round((337.5 / d) * 100) / 100;
+    const notes = [];
+    let design, rows;
+    const row = (label, k, bozrD) => {
+      const r = mm(bozrD), tear = 337.5 / r - k;
+      const m = label === 'flat' ? F : normAxis(F + 90);
+      return { label: `${label === 'flat' ? 'Flat' : 'Steep'} (${m}°)`, k, r, tear, bvp: q25(pm(m) - tear) };
+    };
+    if (dK < 2 - 1e-6) {
+      const adj = dK < 0.5 ? 0 : dK <= 1 + 1e-6 ? 0.25 : 0.5;
+      design = 'Spherical RGP';
+      const r = row('flat', kf, kf + adj);
+      rows = [{ ...r, label: 'Spherical lens' }];
+      notes.push(adj ? `BOZR ${adj.toFixed(2)} D steeper than flat K for ${dK.toFixed(2)} D of corneal cyl → plus tear lens, so add minus (SAM).` : 'BOZR on flat K: no tear-lens power to correct for.');
+      if (resMag >= 0.75) notes.push(`A spherical RGP leaves ${D(resC)} × ${resA} residual cyl. Consider a front-surface toric RGP (prism ballast) or a soft toric.`);
+      else if (resMag >= 0.5) notes.push(`Small residual cyl (${D(resC)} × ${resA}); usually acceptable, but check the VA and over-refraction.`);
+      if (kind === 'ATR' && dK >= 1) notes.push('ATR cornea: spherical RGPs tend to decentre laterally. A soft toric may be the easier fit.');
+    } else {
+      const fac = Math.max(0.5, q25(dK / 4));
+      const flat = row('flat', kf, kf - 0.25), steep = row('steep', ks, ks - fac);
+      rows = [flat, steep];
+      const backTor = 337.5 / steep.r - 337.5 / flat.r, induced = 0.45 * backTor;
+      if (resMag < 0.5) { design = 'SPE bitoric'; notes.push('Refractive cyl ≈ corneal cyl, so no residual: the front cyl only corrects the induced cyl and rotation doesn\'t matter.'); }
+      else if (axisGap(resA, F) <= 20 && Math.abs(resMag - induced) <= 0.5) { design = 'Back-surface toric'; notes.push(`Residual ${D(resC)} × ${resA} ≈ induced cyl (0.45 × ${backTor.toFixed(2)} D back toricity ≈ ${induced.toFixed(2)} D), so a spherical front works.`); }
+      else { design = 'CPE bitoric'; notes.push(`Residual ${D(resC)} × ${resA} doesn't match the induced cyl (≈ ${induced.toFixed(2)} D), so the front cyl corrects both. Relies on the toric back staying locked: check rotation.`); }
+      notes.push(`Mandell–Moore for ${dK.toFixed(2)} D: flat meridian 0.25 D flatter than K, steep meridian ${fac.toFixed(2)} D flatter. Order by meridian; the lab works out the front surface.`);
+    }
+    if (axisGap(a, F) > 20 && axisGap(a, F) < 70 && Math.abs(oc) >= 0.5 && dK >= 0.5) notes.push('The refractive cyl is oblique to the corneal cyl, so the residual is oblique too. Over-refract carefully.');
+    out.innerHTML = `<div class="stack" style="gap:.6rem">
+      <div class="row" style="gap:.4rem"><span class="pill accent">${esc(design)}</span><span class="pill">${kind === 'spherical' ? 'Spherical cornea' : `${kind} corneal cyl`}</span></div>
+      <dl class="rgp-sum"><dt>Corneal cyl</dt><dd>${dK < 0.005 ? 'none' : `${D(-dK)} × ${F}`} <span class="muted">(${kf.toFixed(2)} @${F} / ${ks.toFixed(2)} @${normAxis(F + 90)})</span></dd>
+        <dt>Ocular Rx</dt><dd>${D(so)}${Math.abs(oc) >= 0.005 ? ` / ${D(oc)} × ${a}` : ' DS'}</dd>
+        <dt>Residual cyl</dt><dd>${resMag < 0.005 ? 'none' : `${D(resC)} × ${resA}`}</dd></dl>
+      <div class="tablewrap"><table class="t"><tr><th>Meridian</th><th>K</th><th>BOZR</th><th>Tear lens</th><th>BVP</th></tr>
+        ${rows.map((r) => `<tr><td>${esc(r.label)}</td><td class="mono">${r.k.toFixed(2)} D</td><td class="mono"><b>${r.r.toFixed(2)} mm</b> <span class="muted">(${(337.5 / r.r).toFixed(2)} D)</span></td><td class="mono">${D(Math.round(r.tear * 100) / 100, false)}</td><td class="mono"><b>${D(r.bvp)}</b></td></tr>`).join('')}</table></div>
+      <ul class="answer-list">${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
+      <p class="muted" style="font-size:.85rem;margin:0">A trial lens to start from, not a final order. Confirm with fluorescein and an over-refraction; TD and BOZD come from the HVID and pupil (see the fitting reference).</p></div>`;
   }
   function finder() {
     const out = document.getElementById('finder-out');
@@ -857,6 +974,8 @@
       case 'drill-check': checkDrill(); break;
       case 'lens-mod': lensView.modality = v; renderLenses(); break;
       case 'lens-type': lensView.type = v; renderLenses(); break;
+      case 'lens-kind': lensView.kind = v; try { localStorage.setItem(STORE_KEY + ':lenskind', v); } catch (e) { /* ignore */ } renderLenses(); window.scrollTo(0, 0); break;
+      case 'rgp-group': lensView.group = v; renderLenses(); break;
       case 'theme': {
         const root = document.documentElement;
         const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -883,6 +1002,7 @@
     else if (id && id.startsWith('c-')) calc();
     else if (id && id.startsWith('l-')) lars();
     else if (id && id.startsWith('f-')) finder();
+    else if (id && id.startsWith('g-')) rgpCalc();
   });
   document.addEventListener('change', (ev) => {
     remember(ev.target);
