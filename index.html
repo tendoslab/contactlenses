@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CL Orals Lab</title>
-<meta name="description" content="Contact lens oral exam simulator: cases from past orals, a topic question bank, Rx conversion drills and an Australian lens parameter guide.">
+<meta name="description" content="Contact lens oral exam simulator: cases from past orals, a topic question bank, Rx conversion drills and an Australian lens parameter guide, plus Ocumon: catch contact lens conditions by working through whole cases.">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="img/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <meta name="theme-color" content="#2341b0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap">
 <!-- Bump ?v= on the CSS and JS links whenever they change, so browsers don't keep serving old cached copies. -->
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 <header class="topbar">
@@ -28,18 +28,20 @@
       <a href="#rx">Rx lab</a>
       <a href="#lenses">Lens guide</a>
       <a href="#facts">Fact check</a>
+      <a href="#mon" id="mon-link">Ocumon<span class="badge" id="mon-badge" hidden></span></a>
     </nav>
     <span class="score-pill" id="score-pill" hidden>Score 0 / 0</span>
     <button class="theme-btn" data-act="theme" aria-label="Toggle light or dark theme">◐ Theme</button>
   </div>
 </header>
 <main id="view" aria-live="polite"></main>
-<script src="js/data-lenses.js?v=5"></script>
-<script src="js/data-theory.js?v=5"></script>
-<script src="js/cases-2025.js?v=5"></script>
-<script src="js/cases-2022.js?v=5"></script>
-<script src="js/cases-notes.js?v=5"></script>
-<script src="js/cases-practice.js?v=5"></script>
-<script src="js/app.js?v=5"></script>
+<script src="js/data-lenses.js?v=6"></script>
+<script src="js/data-theory.js?v=6"></script>
+<script src="js/cases-2025.js?v=6"></script>
+<script src="js/cases-2022.js?v=6"></script>
+<script src="js/cases-notes.js?v=6"></script>
+<script src="js/cases-practice.js?v=6"></script>
+<script src="js/data-ocumon.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
 </body>
 </html>
