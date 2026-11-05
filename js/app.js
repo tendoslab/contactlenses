@@ -805,9 +805,10 @@
     <h2 style="margin-top:2rem">Fitting reference</h2>
     <div class="lab-grid" style="margin-top:.8rem">
       <section class="card stack"><h3>Starting parameters</h3>${tbl(['Parameter', 'Rule of thumb'], RGP_FIT.start)}</section>
-      <section class="card stack"><h3>Spherical RGP: BOZR by corneal toricity</h3>${tbl(['Corneal cyl', 'BOZR'], RGP_FIT.bozr)}</section>
+      <section class="card stack"><h3>Spherical RGP: BOZR by corneal toricity</h3>${tbl(['Corneal cyl', 'BOZR'], RGP_FIT.bozr)}
+        <p class="muted" style="margin:0;font-size:.9rem">The fit guide from the past paper (its worked example uses it). Other notes give 0.50 D steeper for 1–2 D, or ⅓ΔK. All land within 0.25 D, so just name the rule you use.</p></section>
       <section class="card stack"><h3>Bitoric / BST: Mandell–Moore</h3>${tbl(['Corneal cyl', 'Flat meridian', 'Steep meridian'], RGP_FIT.mandell)}
-        <p class="muted" style="margin:0;font-size:.9rem">Each BOZR is relative to its own K. Round the toricity to the nearest row.</p></section>
+        <p class="muted" style="margin:0;font-size:.9rem">Each BOZR is relative to its own K. Round the toricity to the nearest row (2.75 D → 3.00 D row). Induced cyl ≈ 0.5 × the lens's back toricity.</p></section>
       <section class="card stack"><h3>Tighten or loosen</h3>${tbl(['Change', 'Tighten', 'Loosen'], RGP_FIT.adjust)}
         <p class="muted" style="margin:0;font-size:.9rem">Typical steps: BOZR 0.05 mm, TD/BOZD 0.2–0.5 mm.</p></section>
       <section class="card stack"><h3>Optics to say out loud</h3>${tbl(['Rule', ''], RGP_FIT.rules)}</section>
@@ -855,23 +856,27 @@
       return { label: `${label === 'flat' ? 'Flat' : 'Steep'} (${m}°)`, k, r, tear, bvp: q25(pm(m) - tear) };
     };
     if (dK < 2 - 1e-6) {
-      const adj = dK < 0.5 ? 0 : dK <= 1 + 1e-6 ? 0.25 : 0.5;
+      // Past-paper fit guide: on flat K to 1.00 D, then a quarter of the toricity, rounded to 0.25 D.
+      const adj = dK <= 1 + 1e-6 ? 0 : q25(dK / 4);
       design = 'Spherical RGP';
       const r = row('flat', kf, kf + adj);
       rows = [{ ...r, label: 'Spherical lens' }];
-      notes.push(adj ? `BOZR ${adj.toFixed(2)} D steeper than flat K for ${dK.toFixed(2)} D of corneal cyl → plus tear lens, so add minus (SAM).` : 'BOZR on flat K: no tear-lens power to correct for.');
+      notes.push(adj ? `BOZR = flat K + ¼ΔK (${dK.toFixed(2)} / 4 → ${adj.toFixed(2)} D steeper) → plus tear lens, so add minus (SAM).` : 'BOZR on flat K: no tear-lens power to correct for.');
       if (resMag >= 0.75) notes.push(`A spherical RGP leaves ${D(resC)} × ${resA} residual cyl. Consider a front-surface toric RGP (prism ballast) or a soft toric.`);
       else if (resMag >= 0.5) notes.push(`Small residual cyl (${D(resC)} × ${resA}); usually acceptable, but check the VA and over-refraction.`);
       if (kind === 'ATR' && dK >= 1) notes.push('ATR cornea: spherical RGPs tend to decentre laterally. A soft toric may be the easier fit.');
     } else {
-      const fac = Math.max(0.5, q25(dK / 4));
-      const flat = row('flat', kf, kf - 0.25), steep = row('steep', ks, ks - fac);
+      // Mandell–Moore, toricity rounded to the nearest 0.50 D row (2.00–5.00 D).
+      const MM = { 2: [0, 0.5], 2.5: [0.25, 0.5], 3: [0.25, 0.75], 3.5: [0.25, 0.75], 4: [0.25, 1], 4.5: [0.25, 1], 5: [0.25, 1.25] };
+      const mmRow = Math.min(5, Math.max(2, Math.round(dK * 2) / 2));
+      const [ff, fac] = MM[mmRow];
+      const flat = row('flat', kf, kf - ff), steep = row('steep', ks, ks - fac);
       rows = [flat, steep];
-      const backTor = 337.5 / steep.r - 337.5 / flat.r, induced = 0.45 * backTor;
+      const backTor = 337.5 / steep.r - 337.5 / flat.r, induced = 0.5 * backTor;
       if (resMag < 0.5) { design = 'SPE bitoric'; notes.push('Refractive cyl ≈ corneal cyl, so no residual: the front cyl only corrects the induced cyl and rotation doesn\'t matter.'); }
-      else if (axisGap(resA, F) <= 20 && Math.abs(resMag - induced) <= 0.5) { design = 'Back-surface toric'; notes.push(`Residual ${D(resC)} × ${resA} ≈ induced cyl (0.45 × ${backTor.toFixed(2)} D back toricity ≈ ${induced.toFixed(2)} D), so a spherical front works.`); }
+      else if (axisGap(resA, F) <= 20 && Math.abs(resMag - induced) <= 0.5) { design = 'Back-surface toric'; steep.bvp = null; notes.push('BST: order ONE BVP, the flat meridian\'s (SAM-FAP on the flat K). The induced cyl takes care of the rest.'); notes.push(`Residual ${D(resC)} × ${resA} ≈ induced cyl (0.5 × ${backTor.toFixed(2)} D back toricity ≈ ${induced.toFixed(2)} D), so a spherical front works.`); }
       else { design = 'CPE bitoric'; notes.push(`Residual ${D(resC)} × ${resA} doesn't match the induced cyl (≈ ${induced.toFixed(2)} D), so the front cyl corrects both. Relies on the toric back staying locked: check rotation.`); }
-      notes.push(`Mandell–Moore for ${dK.toFixed(2)} D: flat meridian 0.25 D flatter than K, steep meridian ${fac.toFixed(2)} D flatter. Order by meridian; the lab works out the front surface.`);
+      notes.push(`Mandell–Moore (${mmRow.toFixed(2)} D row for ${dK.toFixed(2)} D): flat meridian ${ff ? `${ff.toFixed(2)} D flatter than K` : 'on K'}, steep meridian ${fac.toFixed(2)} D flatter.${steep.bvp === null ? '' : ' Bitoric: give the BVP in each meridian (SAM-FAP each one); the lab works out the front surface.'}`);
     }
     if (axisGap(a, F) > 20 && axisGap(a, F) < 70 && Math.abs(oc) >= 0.5 && dK >= 0.5) notes.push('The refractive cyl is oblique to the corneal cyl, so the residual is oblique too. Over-refract carefully.');
     out.innerHTML = `<div class="stack" style="gap:.6rem">
@@ -880,7 +885,7 @@
         <dt>Ocular Rx</dt><dd>${D(so)}${Math.abs(oc) >= 0.005 ? ` / ${D(oc)} × ${a}` : ' DS'}</dd>
         <dt>Residual cyl</dt><dd>${resMag < 0.005 ? 'none' : `${D(resC)} × ${resA}`}</dd></dl>
       <div class="tablewrap"><table class="t"><tr><th>Meridian</th><th>K</th><th>BOZR</th><th>Tear lens</th><th>BVP</th></tr>
-        ${rows.map((r) => `<tr><td>${esc(r.label)}</td><td class="mono">${r.k.toFixed(2)} D</td><td class="mono"><b>${r.r.toFixed(2)} mm</b> <span class="muted">(${(337.5 / r.r).toFixed(2)} D)</span></td><td class="mono">${D(Math.round(r.tear * 100) / 100, false)}</td><td class="mono"><b>${D(r.bvp)}</b></td></tr>`).join('')}</table></div>
+        ${rows.map((r) => `<tr><td>${esc(r.label)}</td><td class="mono">${r.k.toFixed(2)} D</td><td class="mono"><b>${r.r.toFixed(2)} mm</b> <span class="muted">(${(337.5 / r.r).toFixed(2)} D)</span></td><td class="mono">${D(Math.round(r.tear * 100) / 100, false)}</td><td class="mono"><b>${r.bvp === null ? '—' : D(r.bvp)}</b></td></tr>`).join('')}</table></div>
       <ul class="answer-list">${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
       <p class="muted" style="font-size:.85rem;margin:0">A trial lens to start from, not a final order. Confirm with fluorescein and an over-refraction; TD and BOZD come from the HVID and pupil (see the fitting reference).</p></div>`;
   }
