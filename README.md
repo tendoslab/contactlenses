@@ -12,6 +12,7 @@ Open `index.html` in a browser. There is no build step and no server needed. Pro
 | **Question bank** | All 221 case questions plus 93 theory questions from the past-paper booklet, practice doc, CL orals study doc, slide exam notes, Lily's commonly-asked list and the 2022/2025 orals notes, filterable by topic, searchable, with model answers and Got it / Review again marks. |
 | **Rx lab** | Calculator (both meridians, any BVD, nasal-torque axis rounding, spherical-equivalent compromise), a random-Rx conversion drill, a LARS helper, and a step-by-step guide to vertexing and converting a spectacle Rx (worked example, 12 mm quick-reference table, common slips). Values typed here and in the lens finder are remembered across tabs and reloads. |
 | **Lens guide** | Two halves. **Soft lenses**: parameters for the lenses that come up in the orals, a "will it fit?" checker for a CL Rx and soft care systems. **Rigid lenses (RGP)**: a starting-lens calculator (Ks + spectacle Rx → design, BOZR, tear lens, BVP), design cards (spherical, toric, bitoric, KC, scleral, Ortho-K, hybrid), a fitting reference with fluorescein patterns, RGP materials and RGP care. |
+| **Ocumon** | A catch-the-creature study mode, ported from the companion Thera Orals site (inspired by the Anki add-on Ankimon). Pick a starter partner (Torikitty, Hopsheen or Blinkster), then catch the 29 wild contact lens conditions in the Ocudex, from Torquerot (rotated torics) to Sealion (SEAL). A **fight** is one whole oral case that matches the creature, played start to finish: right answers hit it, misses let it hit back, and the catch is decided at the end (80% of the case right for a Lv 10, 85% for Lv 25, 90% for Lv 40). Select-all questions become "which one is right / isn't?", matching asks one row at a time, Rx conversions use the Rx grid, and open questions are a special move (say it, reveal, mark yourself). Rarity follows the exam: **common** creatures match 3+ cases from the 2022 and 2025 orals, **uncommon** 1–2, **rare** only the notes, practice doc and slides, and commons turn up most. Fixing a missed question is a critical hit (double XP); each partner has favourite topics (×1.25 XP). Every 2 team points another of the 24 partners joins; fainted partners rest until the next day; XP slows after 400 a day. Fight answers go on the same missed list as the simulator. |
 | **Fact check** | Claims in the student notes that were wrong or out of date, with the correction and sources. |
 
 ## Topics
@@ -35,7 +36,10 @@ js/cases-2022.js      cases from the 2022 orals
 js/cases-notes.js     cases from the examiner question lists and aftercare notes
 js/cases-practice.js  cases from the practice doc scripts and a slide round from the slide exam notes
 CL orals/             the source past papers, orals notes and study documents
-js/app.js             simulator, question bank, Rx lab, lens guide, fact check
+js/data-ocumon.js     Ocumon partners and wild creatures (check with tools/check-ocumon.js)
+img/sprites/          partner pixel sprites (Little Animals Pack, BDragon1727's Cute Pixel Characters, GrafxKid's Sprite Packs: CC0)
+tools/check-ocumon.js checks every creature matches at least one case, and prints its rarity
+js/app.js             simulator, question bank, Rx lab, lens guide, fact check, Ocumon
 ```
 
 ## Adding a case
