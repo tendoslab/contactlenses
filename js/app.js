@@ -55,6 +55,28 @@
   }
   const stepKey = (c, i) => `${c.id}#${i}`;
 
+  // Your last result on each question: 'right' (full marks), 'part' (half marks) or 'wrong' (none); '' = not tried.
+  // saved.missed (anything under full marks) and saved.seen are kept in step for Ocumon.
+  if (!saved.res) saved.res = {};
+  const RES = { right: { label: 'Right', cls: 'good' }, part: { label: 'Partly right', cls: 'warn' }, wrong: { label: 'Wrong', cls: 'bad' }, '': { label: 'Not tried', cls: '' } };
+  const RES_ORDER = ['wrong', 'part', 'right', ''];
+  function resultOf(k) {
+    if (saved.res[k]) return saved.res[k];
+    // Progress saved before results were split three ways.
+    if (saved.bank[k] === 'known') return 'right';
+    if (saved.bank[k] === 'missed' || saved.missed[k]) return 'wrong';
+    if (saved.seen[k]) return 'right';
+    return '';
+  }
+  function setResult(k, points) {
+    saved.seen[k] = 1;
+    saved.res[k] = points >= PTS ? 'right' : points > 0 ? 'part' : 'wrong';
+    if (points < PTS) saved.missed[k] = 1; else delete saved.missed[k];
+    delete saved.bank[k];
+  }
+  const needsWork = (r) => r === 'wrong' || r === 'part';
+  const resPill = (r) => (r ? `<span class="pill ${RES[r].cls}">${RES[r].label}</span>` : '');
+
   // ------------------------------------------------------------------ helpers
   const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   const shuffled = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -127,21 +149,28 @@
 
   const casePasses = (c) => sim.source === 'all'
     || (sim.source === 'notes' ? !/^20\d\d/.test(c.source) : c.source.startsWith(sim.source));
-  function poolCases() {
-    return CASES.filter((c) => sim.cats.has(c.cat) && casePasses(c)).filter((c) => {
-      if (sim.pool === 'new') return !saved.done[c.id];
-      if (sim.pool === 'missed') return c.steps.some((_, i) => saved.missed[stepKey(c, i)]);
-      return true;
-    });
+  // Pools, by your last result on each question. A case is "not tried" until you answer any of it,
+  // "needs work" while any question in it was wrong or partly right, and "got right" once every question is.
+  const POOLS = {
+    all: { label: 'All', cases: 'every case', drill: 'every question' },
+    new: { label: 'Not tried', cases: 'cases you haven’t answered any question of yet', drill: 'questions you haven’t answered yet' },
+    review: { label: 'Needs work', cases: 'cases with a question you got wrong or only partly right last time', drill: 'questions you got wrong or only partly right last time' },
+    right: { label: 'Got right', cases: 'cases where every question was right last time', drill: 'questions you got right last time (check they’ve stuck)' },
+  };
+  const caseRes = (c) => c.steps.map((_, i) => resultOf(stepKey(c, i)));
+  function poolHas(pool, rs) {
+    if (pool === 'new') return rs.every((r) => !r);
+    if (pool === 'review') return rs.some(needsWork);
+    if (pool === 'right') return rs.every((r) => r === 'right');
+    return true;
   }
-  function poolSteps() {
+  function poolCases(pool = sim.pool) {
+    return CASES.filter((c) => sim.cats.has(c.cat) && casePasses(c) && poolHas(pool, caseRes(c)));
+  }
+  function poolSteps(pool = sim.pool, topics = sim.topics) {
     const out = [];
     CASES.filter(casePasses).forEach((c) => c.steps.forEach((s, i) => {
-      if (!sim.topics.has(s.topic)) return;
-      const k = stepKey(c, i);
-      if (sim.pool === 'new' && saved.seen[k]) return;
-      if (sim.pool === 'missed' && !saved.missed[k]) return;
-      out.push({ c, s: i });
+      if (topics.has(s.topic) && poolHas(pool, [resultOf(stepKey(c, i))])) out.push({ c, s: i });
     }));
     return out;
   }
@@ -152,7 +181,9 @@
     if (max > 0 && sim.count < 1) sim.count = 1;
   }
 
-  function startSession(items) {
+  // kind: 'cases' (whole cases with intros) or 'drill' (single questions), whatever the setup screen says.
+  function startSession(items, kind = sim.mode) {
+    sim.kind = kind;
     sim.items = items; sim.i = 0; sim.score = 0; sim.max = 0; sim.results = [];
     sim.view = items[0] && items[0].intro ? 'intro' : 'question';
     prepStep(); renderSim();
@@ -184,11 +215,10 @@
   function record(points, outcome, detail) {
     const it = cur(), k = stepKey(it.c, it.s);
     sim.score += points; sim.max += PTS;
-    saved.seen[k] = 1;
-    if (points < PTS) saved.missed[k] = 1; else delete saved.missed[k];
+    setResult(k, points);
     sim.results.push({ c: it.c, s: it.s, points });
     const lastOfCase = !sim.items[sim.i + 1] || sim.items[sim.i + 1].c !== it.c || sim.items[sim.i + 1].intro;
-    if (lastOfCase && sim.mode === 'cases') saved.done[it.c.id] = 1;
+    if (lastOfCase && sim.kind === 'cases') saved.done[it.c.id] = 1;
     persist();
     sim.last = { points, outcome, detail };
   }
@@ -276,10 +306,8 @@
         const n = CASES.filter(casePasses).reduce((a, c) => a + c.steps.filter((s) => s.topic === id).length, 0);
         return catButton('topic', id, name, `${n} question${n === 1 ? '' : 's'}`, sim.topics.has(id), TOPIC_HUE[id]);
       });
-    const all = isCases ? CASES.filter((c) => sim.cats.has(c.cat) && casePasses(c)) : null;
-    const counts = isCases
-      ? { all: all.length, new: all.filter((c) => !saved.done[c.id]).length, missed: all.filter((c) => c.steps.some((_, i) => saved.missed[stepKey(c, i)])).length }
-      : (() => { const p = sim.pool; const r = {}; ['all', 'new', 'missed'].forEach((k) => { sim.pool = k; r[k] = poolSteps().length; }); sim.pool = p; return r; })();
+    const counts = {};
+    Object.keys(POOLS).forEach((p) => { counts[p] = isCases ? poolCases(p).length : poolSteps(p).length; });
     const max = poolSize();
     const totalSteps = CASES.reduce((a, c) => a + c.steps.length, 0);
     return `
@@ -317,9 +345,10 @@
           </div>
           <div>
             <p class="label">Pool</p>
-            <div class="seg">
-              ${['all', 'new', 'missed'].map((p) => `<button data-act="pool" data-v="${p}" aria-pressed="${sim.pool === p}" ${counts[p] ? '' : 'disabled'}>${p[0].toUpperCase() + p.slice(1)}<small>${counts[p]}</small></button>`).join('')}
+            <div class="seg seg-4">
+              ${Object.entries(POOLS).map(([p, o]) => `<button data-act="pool" data-v="${p}" aria-pressed="${sim.pool === p}" ${counts[p] || sim.pool === p ? '' : 'disabled'}>${o.label}<small>${counts[p]}</small></button>`).join('')}
             </div>
+            <p class="muted" style="font-size:.88rem;margin:.45rem 0 0"><b>${POOLS[sim.pool].label}:</b> ${isCases ? POOLS[sim.pool].cases : POOLS[sim.pool].drill}.</p>
           </div>
           <div>
             <div class="row" style="justify-content:space-between"><p class="label">${isCases ? 'Cases' : 'Questions'}</p><span class="muted mono" style="font-size:.85rem">${max} available</span></div>
@@ -338,7 +367,46 @@
           <p class="muted" style="margin:0">One patient and a spectacle Rx. History → convert the Rx in your head → pick ONE lens → justify the material → fit → complications → a lifestyle twist → care system → plan B. Expect "why?" and "what else?" at every step. Pen and paper allowed, no calculator.</p>
         </div>
       </section>
-    </div>`;
+    </div>
+    ${progressHTML()}`;
+  }
+
+  // Stacked bar of right / partly right / wrong / not tried for a list of results.
+  function tally(rs) {
+    const n = { right: 0, part: 0, wrong: 0, '': 0 };
+    rs.forEach((r) => { n[r]++; });
+    return n;
+  }
+  function resBar(n, total) {
+    return `<div class="pbar" role="img" aria-label="${n.right} right, ${n.part} partly right, ${n.wrong} wrong, ${n['']} not tried">${['right', 'part', 'wrong'].map((r) => (n[r] ? `<i class="${r}" style="width:${((n[r] / total) * 100).toFixed(2)}%"></i>` : '')).join('')}</div>`;
+  }
+  const resCounts = (n) => ['right', 'part', 'wrong', ''].map((r) => `<span class="rc ${r || 'none'}">${n[r]} ${RES[r].label.toLowerCase()}</span>`).join('');
+
+  // Where you stand on every simulator question, by topic, weakest first, with a one-tap drill of what needs work.
+  function progressHTML() {
+    const steps = [];
+    CASES.filter(casePasses).forEach((c) => c.steps.forEach((s, i) => steps.push({ topic: s.topic, r: resultOf(stepKey(c, i)) })));
+    if (!steps.length) return '';
+    const all = tally(steps.map((x) => x.r));
+    const rows = Object.entries(TOPICS).map(([id, name]) => {
+      const rs = steps.filter((x) => x.topic === id).map((x) => x.r);
+      const n = tally(rs), done = rs.length - n[''];
+      return { id, name, n, total: rs.length, score: done ? (n.right + n.part / 2) / done : 2 };
+    }).filter((t) => t.total).sort((a, b) => a.score - b.score);
+    const action = (t) => (t.n.wrong + t.n.part
+      ? `<button class="chip" data-act="drill-topic" data-v="${t.id}" data-pool="review">Redo ${t.n.wrong + t.n.part}</button>`
+      : t.n[''] ? `<button class="chip" data-act="drill-topic" data-v="${t.id}" data-pool="new">Try ${Math.min(15, t.n[''])} new</button>` : '<span class="pill good">All right</span>');
+    return `<section class="card stack" style="margin-top:1.5rem" aria-labelledby="prog-h">
+      <div class="row" style="justify-content:space-between"><h2 id="prog-h" style="font-size:1.15rem">Your progress</h2>
+        <button class="chip" data-act="clear-progress">Clear progress</button></div>
+      <p class="muted" style="margin:0;font-size:.9rem">Your last answer to each of the ${steps.length} examiner questions${sim.source === 'all' ? '' : ' from this source'}. Topics you're weakest on come first: redo what's wrong or partly right before moving on to new questions.</p>
+      ${resBar(all, steps.length)}
+      <div class="rcs">${resCounts(all)}</div>
+      <div class="prog-list">${rows.map((t) => `<div class="prog-row">
+        <div><b>${esc(t.name)}</b><div class="rcs">${resCounts(t.n)}</div></div>
+        ${resBar(t.n, t.total)}
+        <div>${action(t)}</div></div>`).join('')}</div>
+    </section>`;
   }
 
   function catButton(kind, id, name, sub, on, hue) {
@@ -375,7 +443,7 @@
   function progressBar() {
     const it = cur();
     let label, frac;
-    if (sim.mode === 'cases') {
+    if (sim.kind === 'cases') {
       const steps = it.c.steps.length;
       label = `${esc(it.c.title)} · Step ${it.s + 1} of ${steps}`;
       frac = it.s / steps;
@@ -475,20 +543,37 @@
 
   function viewEnd() {
     const pct = sim.max ? Math.round((sim.score / sim.max) * 100) : 0;
-    const verdict = pct >= 85 ? 'Exam-ready on these cases. Keep the numbers fresh.' : pct >= 65 ? 'A pass, but the "what else?" follow-ups would cost you. Review the misses.' : 'Not there yet. Work through the misses and the Fact check page, then go again.';
+    const verdict = pct >= 85 ? 'Exam-ready on these cases. Keep the numbers fresh.' : pct >= 65 ? 'A pass, but the "what else?" follow-ups would cost you. Go through the wrong and partly right ones below.' : 'Not there yet. Work through the wrong and partly right ones below and the Fact check page, then go again.';
+    const groups = { wrong: [], part: [], right: [] };
+    sim.results.forEach((r) => { groups[r.points >= PTS ? 'right' : r.points > 0 ? 'part' : 'wrong'].push(r); });
+    const redo = groups.wrong.length + groups.part.length;
+    const item = (r, res) => {
+      const st = r.c.steps[r.s];
+      return `<details class="qitem ${res}"><summary><div><div class="qtext">${esc(st.q)}</div>
+        <div class="qmeta">${resPill(res)}${topicPill(st.topic)}<span class="pill">${esc(r.c.title)} · ${esc(st.phase)}</span></div></div><span class="muted" aria-hidden="true">▾</span></summary>
+        <div class="body">${correctAnswerHTML(st)}<div class="model"><p class="label">Model answer</p>${st.model}</div></div></details>`;
+    };
+    const group = (res, intro) => (groups[res].length ? `<section class="stack end-group">
+      <h2 style="font-size:1.1rem;margin:0">${resPill(res)} ${groups[res].length} question${groups[res].length === 1 ? '' : 's'}</h2>
+      <p class="muted" style="margin:0;font-size:.9rem">${intro}</p>
+      ${groups[res].map((r) => item(r, res)).join('')}</section>` : '');
     const byCase = [];
-    sim.results.forEach((r) => {
+    if (sim.kind === 'cases') sim.results.forEach((r) => {
       let row = byCase.find((x) => x.c === r.c);
-      if (!row) { row = { c: r.c, got: 0, max: 0, miss: [] }; byCase.push(row); }
+      if (!row) { row = { c: r.c, got: 0, max: 0 }; byCase.push(row); }
       row.got += r.points; row.max += PTS;
-      if (r.points < PTS) row.miss.push(r.c.steps[r.s].phase);
     });
     return `<section class="card stack" style="max-width:46rem;margin:1rem auto">
       <p class="label">Session complete</p>
       <div class="row" style="align-items:baseline"><span class="big-score">${sim.score}</span><span class="muted mono" style="font-size:1.4rem">/ ${sim.max} · ${pct}%</span></div>
+      ${resBar(tally(sim.results.map((r) => (r.points >= PTS ? 'right' : r.points > 0 ? 'part' : 'wrong'))), sim.results.length)}
       <div class="says"><span class="who">${esc(EXAMINER)}</span><p>${esc(verdict)}</p></div>
-      <div>${byCase.map((r) => `<div class="result-row"><div><b>${esc(r.c.title)}</b><br><small class="muted">${r.miss.length ? 'Missed: ' + esc([...new Set(r.miss)].join(', ')) : 'Clean sweep'}</small></div><span class="mono">${r.got}/${r.max}</span></div>`).join('')}</div>
-      <div class="row"><button class="btn primary" data-act="restart">Back to setup</button><a class="btn" href="#bank">Review in the question bank</a></div>
+      ${byCase.length ? `<div>${byCase.map((r) => `<div class="result-row"><b>${esc(r.c.title)}</b><span class="mono">${r.got}/${r.max}</span></div>`).join('')}</div>` : ''}
+      <div class="row">${redo ? `<button class="btn primary" data-act="redo">Redo the ${redo} that need${redo === 1 ? 's' : ''} work</button>` : ''}<button class="btn${redo ? '' : ' primary'}" data-act="restart">Back to setup</button></div>
+      ${group('wrong', 'Read the model answer, then say it back out loud before you redo these.')}
+      ${group('part', 'You had some of it. Check what the model answer adds: usually the "what else?" or the numbers.')}
+      ${groups.right.length ? `<details class="end-right"><summary>${resPill('right')} ${groups.right.length} question${groups.right.length === 1 ? '' : 's'} right <span class="muted">(show)</span></summary>
+        <div class="stack" style="margin-top:.8rem">${groups.right.map((r) => item(r, 'right')).join('')}</div></details>` : ''}
     </section>`;
   }
 
@@ -502,11 +587,9 @@
     THEORY.forEach((t, i) => items.push({ key: `theory#${i}`, topic: t.topic, q: t.q, model: t.model, source: t.source }));
     return items;
   }
-  function bankStatus(it) {
-    if (saved.bank[it.key]) return saved.bank[it.key];
-    if (saved.missed[it.key]) return 'missed';
-    return '';
-  }
+  const bankStatus = (it) => resultOf(it.key);
+  const BANK_FILTERS = [['all', 'All questions'], ['review', 'Needs work (wrong + partly right)'], ['wrong', 'Wrong'], ['part', 'Partly right'], ['right', 'Right'], ['new', 'Not tried']];
+  const bankPasses = (st, f) => f === 'all' || (f === 'review' ? needsWork(st) : f === 'new' ? !st : st === f);
   function wrongOptionsHTML(st) {
     if (!st.why) return '';
     const items = Object.keys(st.why).map((oi) => `<li><span class="muted">${esc(st.options[oi])}</span>${whyNote(st, oi)}</li>`).join('');
@@ -525,30 +608,32 @@
     const all = bankItems();
     const ql = bank.q.trim().toLowerCase();
     const list = all.filter((it) => (bank.topic === 'all' || it.topic === bank.topic)
-      && (bank.status === 'all' || (bank.status === 'unmarked' ? !bankStatus(it) : bankStatus(it) === bank.status))
+      && bankPasses(bankStatus(it), bank.status)
       && (!ql || (it.q + ' ' + it.model + ' ' + it.source).toLowerCase().includes(ql)));
     const counts = {};
     all.forEach((it) => { counts[it.topic] = (counts[it.topic] || 0) + 1; });
+    const inTopic = all.filter((it) => bank.topic === 'all' || it.topic === bank.topic).map(bankStatus);
     view.innerHTML = `<div class="fade">
       <section class="hero"><div><p class="label">Question bank</p><h1>Every question, sorted by topic</h1>
-      <p>${all.length} questions: each examiner step from the oral cases plus the past-paper theory questions. Open one, answer it out loud, then check the model answer and mark it.</p></div></section>
+      <p>${all.length} questions: each examiner step from the oral cases plus the past-paper theory questions. Open one, answer it out loud, then check the model answer and mark how you did. Simulator and Ocumon answers are marked for you.</p></div></section>
       <div class="toolbar">
         <input type="search" id="bank-q" placeholder="Search (e.g. Aldox, LARS, bitoric)" value="${esc(bank.q)}" aria-label="Search questions">
         <select id="bank-status" aria-label="Filter by status" style="width:auto">
-          ${[['all', 'All statuses'], ['unmarked', 'Not yet marked'], ['known', 'Got it'], ['missed', 'Review again']].map(([v, l]) => `<option value="${v}" ${bank.status === v ? 'selected' : ''}>${l}</option>`).join('')}
+          ${BANK_FILTERS.map(([v, l]) => `<option value="${v}" ${bank.status === v ? 'selected' : ''}>${l} · ${inTopic.filter((r) => bankPasses(r, v)).length}</option>`).join('')}
         </select>
       </div>
       <div class="row" style="gap:.4rem;margin-bottom:1rem">
         <button class="chip" data-act="bank-topic" data-v="all" aria-pressed="${bank.topic === 'all'}">All topics · ${all.length}</button>
         ${Object.entries(TOPICS).map(([id, n]) => `<button class="chip" data-act="bank-topic" data-v="${id}" aria-pressed="${bank.topic === id}">${esc(n)} · ${counts[id] || 0}</button>`).join('')}
       </div>
+      ${resBar(tally(inTopic), inTopic.length)}<div class="rcs" style="margin:.4rem 0 .6rem">${resCounts(tally(inTopic))}</div>
       <p class="muted" style="font-size:.9rem">${list.length} shown</p>
       <div class="stack" id="bank-list">${list.map((it) => {
         const stt = bankStatus(it);
         return `<details class="qitem ${stt}" data-key="${esc(it.key)}" ${bank.open.has(it.key) ? 'open' : ''}>
-          <summary><div><div class="qtext">${esc(it.q)}</div><div class="qmeta">${topicPill(it.topic)}<span class="pill">${esc(it.source)}</span>${stt === 'known' ? '<span class="pill good">Got it</span>' : stt === 'missed' ? '<span class="pill bad">Review again</span>' : ''}</div></div><span class="muted" aria-hidden="true">▾</span></summary>
+          <summary><div><div class="qtext">${esc(it.q)}</div><div class="qmeta">${topicPill(it.topic)}<span class="pill">${esc(it.source)}</span>${resPill(stt)}</div></div><span class="muted" aria-hidden="true">▾</span></summary>
           <div class="body">${correctAnswerHTML(it.step)}<div class="model"><p class="label">Model answer</p>${it.model}</div>
-          <div class="row"><button class="btn" data-act="bank-mark" data-v="known" data-key="${esc(it.key)}">Got it</button><button class="btn" data-act="bank-mark" data-v="missed" data-key="${esc(it.key)}">Review again</button></div></div>
+          <div><p class="label">How did you do?</p><div class="row"><button class="btn" data-act="bank-mark" data-v="10" data-key="${esc(it.key)}" aria-pressed="${stt === 'right'}">Right</button><button class="btn" data-act="bank-mark" data-v="5" data-key="${esc(it.key)}" aria-pressed="${stt === 'part'}">Partly right</button><button class="btn" data-act="bank-mark" data-v="0" data-key="${esc(it.key)}" aria-pressed="${stt === 'wrong'}">Wrong</button></div></div></div>
         </details>`;
       }).join('') || '<p class="muted">No questions match these filters.</p>'}</div></div>`;
   }
@@ -821,6 +906,11 @@
           ${inp('g-s', 'Sphere', '-4.50')}${inp('g-c', 'Cyl', '-2.00')}${inp('g-a', 'Axis', '180')}</div></div>
       </div>
       <div id="rgp-out"></div>
+    </section>
+    <section class="card stack" style="margin-bottom:1.5rem">
+      <h2 style="font-size:1.15rem">Which design for which astigmatism?</h2>
+      ${tbl(['Design', 'Corneal cyl', 'Refractive cyl', 'Why'], RGP_FIT.astig)}
+      <p class="muted" style="margin:0;font-size:.9rem">Induced astigmatism of a back-surface toric ≈ 0.5 × ΔK of the back surface (in dioptres of back-surface toricity). Residual cyl = refractive cyl at the cornea − corneal cyl.</p>
     </section>
     <h2>Designs</h2>
     <div class="row" style="gap:.4rem;margin:.6rem 0 1rem">${groups.map((g) => `<button class="chip" data-act="rgp-group" data-v="${g}" aria-pressed="${lensView.group === g}">${g === 'all' ? 'All designs' : g}</button>`).join('')}</div>
@@ -1157,7 +1247,7 @@
         Object.values(m.party).forEach((v) => { v.hp = monMaxHp(v.level); });
         monLog(`${Object.keys(m.party).length > 1 ? 'Your whole team' : pal.name} fainted and ${w.name} got away. No XP lost.`, 'bad');
       }
-    } else if (fx.dmg) monLog(`${w.name} −${fx.dmg}${fx.crit ? ' · critical: missed question fixed' : ''}${fx.eff ? ' · favourite topic' : ''}${fx.repeat ? ' · repeat today' : ''}`);
+    } else if (fx.dmg) monLog(`${w.name} −${fx.dmg}${fx.crit ? ' · critical: needs-work question fixed' : ''}${fx.eff ? ' · favourite topic' : ''}${fx.repeat ? ' · repeat today' : ''}`);
     else monLog(`${w.name} hit ${pal.name} −${fx.hurt}`, 'bad');
     if (fx.caught || fx.fainted) monSpawn();
     monXp(fx);
@@ -1250,10 +1340,7 @@
     persist(); monRender();
   }
   // Fight answers go on the same missed list as the simulator's.
-  function monTrack(k, points) {
-    saved.seen[k] = 1;
-    if (points < PTS) saved.missed[k] = 1; else delete saved.missed[k];
-  }
+  function monTrack(k, points) { setResult(k, points); }
   // Scores the current turn: damage (or a hit back) while the battle is on, and the missed list once the step's
   // last turn is in. When the case runs out of questions with the creature still standing, it gets away.
   function huntScore(points, extra) {
@@ -1477,7 +1564,7 @@
       if (fx.crit) K.act('.bt-stage', 'quake', 450);
       await K.act('.bt-mon.foe .bt-fx', 'hit', 650);
       await K.drain('foe', P.wHp, Math.max(0, P.wHp - fx.dmg), wMax);
-      if (fx.crit) await K.say('A critical hit! Missed question fixed: double XP.');
+      if (fx.crit) await K.say('A critical hit! Needs-work question fixed: double XP.');
       if (fx.eff) await K.say(`It’s ${P.pal.name}’s favourite topic: bonus XP!`);
       if (fx.repeat) await K.say('Already right today… no XP this time.');
     } else {
@@ -1676,16 +1763,16 @@
         <section class="card stack"><h2 style="font-size:1.15rem">Recent</h2>${log}</section>
         <section class="card stack"><h2 style="font-size:1.15rem">How it works</h2>
           <ul class="arc-rules">
-            <li>⚔️ <b>Fight</b> takes you through one whole oral case that matches the creature (ones with missed questions first). Your answers still go on the missed list the simulator and question bank use</li>
+            <li>⚔️ <b>Fight</b> takes you through one whole oral case that matches the creature (ones with questions that need work first). Your answers are marked right, partly right or wrong, the same as in the simulator and question bank</li>
             <li>🎯 You always play the whole case: the catch is decided at the end. Get ${Math.round(100 * MON_NEED[1])}% of the case right to catch a Lv ${TIER_LV[1]}, ${Math.round(100 * MON_NEED[2])}% for Lv ${TIER_LV[2]} and ${Math.round(100 * MON_NEED[3])}% for Lv ${TIER_LV[3]}, or it gets away. Its HP bar shows how much of the case is still to get right</li>
             <li>🔤 Select-all questions become “which one is right?” (or “which one isn’t?”), matching asks one row at a time, Rx conversions use the Rx grid, and open questions are a special move: say it out loud, reveal the model answer, then mark yourself</li>
             <li>✅ Right answer: damage and 10 XP. Half marks still do half damage</li>
-            <li>💥 Fix a question that was on your missed list: critical hit, double XP. Your partner’s favourite topics give ×1.25 XP, and each rank +10%. Bonuses never change damage, so only your answers decide a catch</li>
+            <li>💥 Fix a question that needed work (wrong or partly right last time): critical hit, double XP. Your partner’s favourite topics give ×1.25 XP, and each rank +10%. Bonuses never change damage, so only your answers decide a catch</li>
             <li>🌟 Get the whole case right for a perfect catch: double the catch XP, and the creature is marked Mastered in your Ocudex</li>
             <li>❌ Wrong answer: it hits back. If your partner faints, your strongest teammate still standing takes over. Fainted Ocumon rest until tomorrow, so share the fights out. If your whole team faints the creature escapes, but you lose nothing and can finish the case for practice</li>
             <li>🏃 <b>Run</b> finds another creature. New ones only turn up in the wild; ones you’ve caught can be battled again from the Ocudex</li>
             <li>🎓 Rarity follows the exam. <b>Common</b> (Lv ${TIER_LV[1]}) creatures match 3 or more cases from the 2022 and 2025 orals, so they turn up most and are the best ones to drill. <b>Uncommon</b> (Lv ${TIER_LV[2]}) match 1 or 2. <b>Rare</b> (Lv ${TIER_LV[3]}) are only in the notes, practice doc and slides</li>
-            <li>🎲 Creatures you haven’t caught, groups with missed questions and the group you just fought turn up more often; ones you’ve just seen turn up less, and so do cases you’ve just done</li>
+            <li>🎲 Creatures you haven’t caught, groups with questions that need work and the group you just fought turn up more often; ones you’ve just seen turn up less, and so do cases you’ve just done</li>
             <li>🔁 Got it right already today? No XP. New questions beat repeats</li>
             <li>🌙 XP slows after ${MON_DAILY_XP} a day; HP is restored each morning</li>
             <li>🤝 Team points: 1 for each new creature and 1 for every ${MON_REPEATS} repeat catches. Every ${MON_UNLOCK} points, another Ocumon joins your team. Send out whoever you like: each keeps its own level and favourite topics</li>
@@ -1696,7 +1783,7 @@
         <div class="mon-meter xp" aria-hidden="true" style="margin-bottom:1rem"><span style="width:${(100 * got) / total}%"></span></div>
         ${dex}</section>
       <section class="card stack" style="margin-top:1.4rem"><h2 style="font-size:1.15rem">Your save</h2>
-        <p class="muted" style="margin:0">Ocumon progress lives in this browser, alongside your missed questions.</p>
+        <p class="muted" style="margin:0">Ocumon progress lives in this browser, alongside your right / partly right / wrong marks.</p>
         <div class="row" style="gap:.5rem"><button class="btn ghost small" data-act="mon-reset">Start Ocumon again</button></div></section>
     </div>`;
     btIntro();
@@ -1720,7 +1807,7 @@
         <section class="card stack bt-ask"><p class="label">Case complete</p><h2>${head}</h2>
           <p>You got <b>${pct}%</b> of this case right. ${hunt.over === 'caught' ? '' : `A ${wildLv(w)} creature needs ${need}% to catch. It still turns up in the wild, so you’ll get another go.`}</p>
           <div class="mon-meter xp" aria-hidden="true"><span style="width:${Math.min(100, pct)}%"></span></div>
-          ${pct < 100 ? '<p class="muted" style="margin:0">Questions under full marks are on your missed list, so fixing them in a later fight earns double XP.</p>' : ''}
+          ${pct < 100 ? '<p class="muted" style="margin:0">Questions under full marks are marked as needing work, so fixing them in a later fight earns double XP.</p>' : ''}
           <div class="row"><button class="btn primary" data-act="mon-next" id="mon-next">Back to Ocumon →</button><button class="btn ghost small" data-act="mon-case" data-v="${c.id}">Run this case in the simulator</button></div>
         </section></div></div>`;
       const nb = document.getElementById('mon-next'); if (nb) nb.focus({ preventScroll: true });
@@ -1746,7 +1833,7 @@
     let after = '';
     if (L) {
       if (fx) {
-        const tags = [fx.crit && 'critical: missed question fixed', fx.eff && `bonus XP: ${pal.name}’s topic`, fx.repeat && 'repeat today: no XP', fx.tired && 'tired: quarter XP'].filter(Boolean);
+        const tags = [fx.crit && 'critical: needs-work question fixed', fx.eff && `bonus XP: ${pal.name}’s topic`, fx.repeat && 'repeat today: no XP', fx.tired && 'tired: quarter XP'].filter(Boolean);
         after += fx.dmg
           ? `<div class="arc-verdict ${L.ok ? 'good' : 'part'}"><b>${L.ok ? '✓' : '½'} ${fx.w.icon} ${esc(fx.w.name)} −${fx.dmg}</b><span class="arc-gain mono">${fx.xp ? `+${fx.xp} XP` : ''}</span></div>`
           : `<div class="arc-verdict bad"><b>✕ ${esc(fx.w.name)} hit back</b><span class="mono">−${fx.hurt} HP</span></div>`;
@@ -1769,7 +1856,7 @@
     }
     view.innerHTML = `<div class="fade fight"><div class="fight-side">${scene}</div><div class="fight-main">${recordPanel(c, st)}
       <section class="card stack bt-ask">
-        <div class="pills">${topicPill(st.topic)}<span class="pill">Question ${qn} of ${hunt.turns.length}</span>${hunt.fixed[t.s] && !L ? '<span class="pill warn">On your missed list: double XP if right</span>' : ''}</div>
+        <div class="pills">${topicPill(st.topic)}<span class="pill">Question ${qn} of ${hunt.turns.length}</span>${hunt.fixed[t.s] && !L ? '<span class="pill warn">Needs work: double XP if right</span>' : ''}</div>
         <h2 class="arc-q">${esc(st.q)}</h2>
         ${body}${after}
         ${L ? '' : `<div class="row"><button class="btn ghost small" data-act="mon-stop">Run from this battle</button><span class="muted" style="font-size:.85rem">${t.kind === 'pick' ? 'Keys 1–4 answer, Enter moves on' : 'Enter moves on'}</span></div>`}
@@ -1782,7 +1869,7 @@
     const c = caseById(id);
     if (!c) return;
     hunt = null;
-    sim.mode = 'cases';
+    sim.mode = 'cases'; sim.kind = 'cases';
     const items = [{ c, intro: true }];
     c.steps.forEach((_, i) => items.push({ c, s: i }));
     sim.items = items; sim.i = 0; sim.score = 0; sim.max = 0; sim.results = []; sim.view = 'intro';
@@ -1857,7 +1944,14 @@
       case 'quit': sim.view = sim.results.length ? 'end' : 'start'; renderSim(); break;
       case 'restart': sim.view = 'start'; sim.count = 0; renderSim(); break;
       case 'bank-topic': bank.topic = v; renderBank(); break;
-      case 'bank-mark': saved.bank[b.dataset.key] = v; if (v === 'known') delete saved.missed[b.dataset.key]; persist(); bank.open.add(b.dataset.key); renderBank(); break;
+      case 'bank-mark': setResult(b.dataset.key, Number(v)); persist(); bank.open.add(b.dataset.key); renderBank(); break;
+      case 'drill-topic': startSession(shuffled(poolSteps(b.dataset.pool, new Set([v]))).slice(0, 15), 'drill'); break;
+      case 'redo': startSession(sim.results.filter((r) => r.points < PTS).map((r) => ({ c: r.c, s: r.s })), 'drill'); break;
+      case 'clear-progress':
+        if (confirm('Clear your right / partly right / wrong marks on every question? Ocumon partners and the Ocudex are kept.')) {
+          saved.res = {}; saved.missed = {}; saved.seen = {}; saved.done = {}; saved.bank = {}; persist(); renderSim();
+        }
+        break;
       case 'drill-new': newDrill(); break;
       case 'to-guide': { const g = document.getElementById('guide'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
       case 'drill-check': checkDrill(); break;
@@ -1882,7 +1976,7 @@
       case 'mon-stop': hunt = null; monRender({ keepScroll: true }); break;
       case 'mon-case': simCase(v); break;
       case 'mon-reset':
-        if (confirm('Start Ocumon again? Your partners, their levels and your Ocudex are cleared. Your missed questions are not touched.')) { saved.mon = cleanMon({}); hunt = null; persist(); monRender(); }
+        if (confirm('Start Ocumon again? Your partners, their levels and your Ocudex are cleared. Your right / partly right / wrong marks are not touched.')) { saved.mon = cleanMon({}); hunt = null; persist(); monRender(); }
         break;
       case 'theme': {
         const root = document.documentElement;

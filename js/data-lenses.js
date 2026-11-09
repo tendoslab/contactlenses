@@ -290,6 +290,14 @@ const RGP_FIT = {
     ['Peripheral curves', 'Flatter outwards (bigger mm): SCR ≈ BOZR + 1 mm, PCR ≈ SCR + 2 mm. Aim for a 0.4–0.5 mm edge band.'],
     ['Centre thickness', 'About 0.15 mm for low minus. Thicker for plus and high-Dk materials; lenticulate high plus and high minus.'],
   ],
+  // Which rigid design for which astigmatism (from the 2025 orals model answer and the theory notes).
+  astig: [
+    ['Spherical', '< 2.00 D (up to ~3 D)', '≈ corneal (low residual)', 'The tear lens neutralises the corneal cyl, so nothing is left over.'],
+    ['Front-surface toric', 'Low', 'Significant residual (internal cyl)', 'Spherical back on a near-spherical cornea; front cyl corrects the residual. Needs prism ballast ± truncation, expect 10–15° nasal rotation.'],
+    ['Back-surface toric', '> 2.00 D', '1.2–1.4 × corneal', 'Toric back aligns with the toric cornea. The cyl it induces corrects the residual.'],
+    ['SPE bitoric', '> 2.00 D', '≈ corneal', 'Front cyl only cancels the induced cyl, so the lens works at any rotation.'],
+    ['CPE bitoric', '> 2.00 D', '≠ corneal', 'Front cyl corrects the residual as well as the induced cyl, so it must not rotate.'],
+  ],
   bozr: [
     ['0.00–1.00 D', 'On flat K'],
     ['1.12–2.00 D', 'Flat K + ¼ΔK'],

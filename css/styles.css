@@ -256,8 +256,30 @@ svg.cross text.sub { fill: var(--muted); }
 .qitem .qtext { font-weight: 600; }
 .qitem .qmeta { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .35rem; }
 .qitem .body { margin-top: .8rem; display: flex; flex-direction: column; gap: .7rem; }
-.qitem.known { border-left: 4px solid var(--good); }
-.qitem.missed { border-left: 4px solid var(--bad); }
+.qitem.right { border-left: 4px solid var(--good); }
+.qitem.part { border-left: 4px solid var(--warn); }
+.qitem.wrong { border-left: 4px solid var(--bad); }
+.qitem .btn[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+/* Progress: right / partly right / wrong as a stacked bar (unfilled = not tried) */
+.seg.seg-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.seg.seg-4 button { font-size: .9rem; }
+.pbar { display: flex; height: .6rem; border-radius: 99px; overflow: hidden; background: var(--line); min-width: 0; }
+.pbar i { display: block; height: 100%; }
+.pbar .right { background: var(--good); }
+.pbar .part { background: var(--warn); }
+.pbar .wrong { background: var(--bad); }
+.rcs { display: flex; flex-wrap: wrap; gap: .25rem .8rem; font-size: .82rem; color: var(--muted); }
+.rc::before { content: ""; display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; margin-right: .3rem; vertical-align: -.05rem; background: var(--line); }
+.rc.right::before { background: var(--good); }
+.rc.part::before { background: var(--warn); }
+.rc.wrong::before { background: var(--bad); }
+.prog-list { display: flex; flex-direction: column; }
+.prog-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 7rem; gap: .5rem 1rem; align-items: center; padding: .6rem 0; border-top: 1px solid var(--line); }
+.prog-row > div:last-child { text-align: right; }
+@media (max-width: 640px) { .prog-row { grid-template-columns: minmax(0, 1fr) auto; } .prog-row .pbar { grid-column: 1 / -1; grid-row: 2; } }
+.end-group { margin-top: .6rem; }
+.end-right { margin-top: .6rem; }
+.end-right > summary { cursor: pointer; font-weight: 650; }
 .answer-list { margin: 0; padding-left: 1.2rem; }
 
 /* ---------- lens guide ---------- */
