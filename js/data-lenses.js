@@ -204,6 +204,35 @@ const RGP_MATERIALS = [
   { name: 'Menicon Z', family: 'Fluorosilicone methacrylate (hyper-Dk)', dk: '163 (ISO) / 189 (Fatt)', notes: 'Hyper-Dk. Plasma-treated surface for wettability.' },
 ];
 
+/* Soft toric stabilisation designs, shown with front-view and thickness diagrams in the soft lens guide.
+ * match: tests a lens's `stab` text so each card can list the lenses in this guide that use it. */
+const SOFT_STAB = [
+  { id: 'prism', name: 'Prism ballast', match: /prism ballast|optimised toric/i,
+    how: '0.75–1.5Δ base-down prism across the whole lens, optic zone included, so the lens is thickest at 6 o\'clock. Gravity and the upper lid squeezing the lens down ("watermelon seed") keep the heavy edge at the bottom.',
+    lids: 'Works with most lid shapes; the most forgiving for oblique axes.',
+    watch: 'Thick inferior edge: lower Dk/t at 6 o\'clock (hydrogels), more awareness of the lower lid, vertical prism if only one eye wears it. CooperVision\'s "optimised toric lens geometry" is a prism-ballast type with a wide ballast band of even thickness.' },
+  { id: 'peri', name: 'Peri-ballast / low-positioned ballast', match: /peri-ballast|opticalign/i,
+    how: 'Ballast only in the lower periphery, outside the optic zone, so there\'s no prism through the optics and the centre stays thinner.',
+    lids: 'Lower lid and gravity hold the thick crescent down; the upper lid rides over the thin top.',
+    watch: 'Less prism and thickness than full prism ballast, but still relies on the lower lid; can be slower to settle.' },
+  { id: 'pb84', name: 'Ballast band from 8 to 4 o\'clock (Alcon Precision Balance 8|4)', match: /8\|4/i, confirm: true,
+    how: 'A ballast zone across the lower lens, roughly from 8 o\'clock to 4 o\'clock, with a thin upper half. A ballast design that keeps the thick zone out of the upper lid\'s way.',
+    lids: 'Upper lid passes over the thin top; the inferior ballast keeps the lens oriented between blinks.',
+    watch: 'Still thicker below, so check the lower lid edge and inferior Dk/t. Confirm the exact geometry against Alcon\'s fitting guide.' },
+  { id: 'asd', name: 'Accelerated / blink stabilisation (Acuvue Blink Stabilized)', match: /blink stabili[sz]ed/i,
+    how: 'Thin top and bottom, with four thicker stabilisation zones in the mid-periphery near 3 and 9 o\'clock. No prism in the optic zone.',
+    lids: 'Each blink, the lids push on the thick zones and turn the lens back into place, so it suits a firm blink and lids that cover the top and bottom of the lens.',
+    watch: 'Wide palpebral apertures, loose lids or a weak blink give the lids less to work with. Same thickness in both eyes, so no vertical prism imbalance.' },
+  { id: 'dyn', name: 'Dynamic stabilisation / double slab-off', match: /double slab|dynamic stabili/i,
+    how: 'Thin zones cut away top and bottom (slab-off), leaving the lens thickest along the horizontal at 3 and 9 o\'clock. Symmetrical, so it can\'t sit upside down.',
+    lids: 'The upper and lower lids squeeze the thin zones and hold the thick horizontal band in the aperture ("melon seed" between the lids).',
+    watch: 'Needs lids that cover the top and bottom of the lens; less stable with a wide aperture. Thick zones at 3 and 9 are exposed: check Dk/t there with hydrogels.' },
+  { id: 'trunc', name: 'Truncation', match: /truncat/i,
+    how: 'The bottom 1–1.5 mm of a prism-ballast lens is cut off, leaving a flat edge that sits on the lower lid margin.',
+    lids: 'Needs a lower lid at or just above the limbus for the flat edge to rest on.',
+    watch: 'Last resort, mostly in custom lenses: the flat edge is felt more and can catch the lower lid. Often combined with prism.' },
+];
+
 /* Rigid lens designs, shown as cards in the Rigid lenses part of the lens guide. */
 const RGP_DESIGNS = [
   { name: 'Spherical corneal RGP', fig: 'spherical', group: 'Corneal',

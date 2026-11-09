@@ -781,8 +781,20 @@
       <dl><dt>Material</dt><dd>${esc(l.material)}</dd><dt>Water</dt><dd>${l.water}%</dd><dt>Dk/t</dt><dd>${l.dkt ?? '—'}</dd><dt>Modulus</dt><dd>${l.modulus ? l.modulus + ' MPa' : '—'}</dd>
       <dt>BC / Dia</dt><dd>${esc(l.bc)} / ${esc(l.dia)}</dd><dt>Sphere</dt><dd>${esc(sphTxt(l))}</dd>
       ${l.type !== 'Sphere' ? `<dt>Cyl</dt><dd>${l.cyl.map((x) => D(x)).join(', ')}</dd><dt>Axes</dt><dd>${l.axisStep}° steps</dd>` : ''}
-      <dt>Stabilisation</dt><dd>${esc(l.stab)}</dd><dt>Overnight</dt><dd>${esc(l.ew)}</dd></dl>
+      <dt>Stabilisation</dt><dd>${(() => { const d = typeof SOFT_STAB !== 'undefined' && SOFT_STAB.find((x) => x.match.test(l.stab)); return d ? `<button class="linkbtn" data-act="stab-go" data-v="${d.id}">${esc(l.stab)}</button>` : esc(l.stab); })()}</dd><dt>Overnight</dt><dd>${esc(l.ew)}</dd></dl>
       ${l.notes ? `<p class="muted" style="font-size:.9rem;margin:0">${esc(l.notes)}</p>` : ''}</article>`).join('')}</div>
+    <section style="margin-top:2rem" class="stack"><h2>Toric stabilisation designs</h2>
+      <p class="muted" style="margin:0">How each design keeps the cyl axis in place. Front views are shaded by relative thickness (darker = thicker) and sit between the lids; the profiles show thickness along the vertical and horizontal meridians. Schematic, not to scale.</p>
+      <div class="lens-grid">${SOFT_STAB.map((d) => { const uses = LENSES.filter((l) => d.match.test(l.stab)).map((l) => l.name); return `<article class="card lens hue-top" id="stab-${d.id}" style="--h:195">
+        <div class="row" style="gap:.35rem"><span class="pill tint">Soft toric</span>${d.confirm ? '<span class="pill warn">confirm</span>' : ''}</div>
+        <h3>${esc(d.name)}</h3>
+        ${typeof softStabFigure === 'function' ? softStabFigure(d.id, esc(d.name)) : ''}
+        <dl><dt>How</dt><dd class="prose">${esc(d.how)}</dd><dt>Lids</dt><dd class="prose">${esc(d.lids)}</dd>${uses.length ? `<dt>In this guide</dt><dd class="prose">${uses.map(esc).join(', ')}</dd>` : ''}</dl>
+        <p class="muted" style="font-size:.9rem;margin:0"><b>Watch for:</b> ${esc(d.watch)}</p></article>`; }).join('')}
+        <article class="card lens hue-top" id="stab-lars" style="--h:195"><div class="row" style="gap:.35rem"><span class="pill tint">Soft toric</span></div>
+        <h3>Reading rotation: LARS</h3>${typeof larsFigure === 'function' ? larsFigure() : ''}
+        <p class="muted" style="font-size:.9rem;margin:0">Rotation is judged as you see it from in front. Mark to your left → add; to your right → subtract. Expect 5–10° nasal rotation with most designs. If the rotation isn't stable from blink to blink, change the lens or design rather than compensating.</p></article>
+      </div></section>
     <section style="margin-top:2rem" class="stack"><h2>Soft lens care systems</h2>${careTable(SOLUTIONS.filter((x) => x.use !== 'rgp'))}
       <p class="muted" style="margin:0">RGP solutions and materials are under <button class="linkbtn" data-act="lens-kind" data-v="rigid">Rigid lenses</button>.</p></section>
     </div>`;
@@ -1852,6 +1864,7 @@
       case 'lens-mod': lensView.modality = v; renderLenses(); break;
       case 'lens-type': lensView.type = v; renderLenses(); break;
       case 'lens-kind': lensView.kind = v; try { localStorage.setItem(STORE_KEY + ':lenskind', v); } catch (e) { /* ignore */ } renderLenses(); window.scrollTo(0, 0); break;
+      case 'stab-go': { const el = document.getElementById('stab-' + v); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
       case 'rgp-group': lensView.group = v; renderLenses(); break;
       case 'mon-starter': monChoose(v); break;
       case 'mon-hunt': huntStart(); break;

@@ -606,3 +606,24 @@ div.opt { cursor: default; } div.opt:hover { border-color: var(--line); } div.op
 .rgpfig .sw.tear { background: var(--fluoro); }
 .rgpfig .sw.eye { background: var(--surface-2); border: 1px solid var(--muted); }
 .rgpfig .sw.soft { background: color-mix(in srgb, var(--teal) 40%, transparent); border: 1px solid var(--teal); }
+
+/* Soft toric stabilisation diagrams (js/soft-figs.js) */
+.softfig .sclera { fill: var(--surface); stroke: var(--line); }
+.softfig .iris { fill: none; stroke: var(--line); stroke-width: 1; }
+.softfig .thick rect { fill: hsl(var(--h, 195) 70% var(--tint-mid)); }
+.softfig .edge { fill: none; stroke: hsl(var(--h, 195) 65% var(--tint-mid)); stroke-width: 1.1; }
+.softfig .edge.lensfill { fill: hsl(var(--h, 195) 65% var(--tint-mid) / .22); }
+.softfig .oz { fill: none; stroke: var(--ink); stroke-width: .7; stroke-dasharray: 2 2; opacity: .55; }
+.softfig .mark { stroke: var(--bad); stroke-width: 2; stroke-linecap: round; }
+.softfig .ref { stroke: var(--muted); stroke-width: .8; stroke-dasharray: 3 2; }
+.softfig .arc { fill: none; stroke: var(--bad); stroke-width: .9; }
+.softfig .lid { fill: var(--surface-2); fill-opacity: .92; stroke: var(--muted); stroke-width: .8; }
+.softfig .base { stroke: var(--muted); stroke-width: .7; }
+.softfig .prof { fill: hsl(var(--h, 195) 65% var(--tint-mid) / .5); stroke: hsl(var(--h, 195) 65% var(--tint-mid)); stroke-width: 1; }
+.softfig text.mono { font-family: var(--font-mono); font-size: 8px; fill: var(--ink); }
+.softfig .sw.thin { background: hsl(var(--h, 195) 70% var(--tint-mid) / .2); }
+.softfig .sw.thk { background: hsl(var(--h, 195) 70% var(--tint-mid) / .85); }
+.softfig .sw.oz { border: 1px dashed var(--ink); opacity: .7; }
+.softfig .sw.mk { background: var(--bad); height: .25rem; vertical-align: 2px; }
+.softfig .sw.ref { border-top: 1px dashed var(--muted); height: 0; vertical-align: 3px; }
+[id^="stab-"] { scroll-margin-top: 5rem; }
