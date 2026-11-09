@@ -815,6 +815,7 @@
     <div class="lens-grid">${list.map((d) => `<article class="card lens hue-top" style="--h:${GROUP_HUE[d.group] ?? 275}">
       <div class="row" style="gap:.35rem"><span class="pill tint">${esc(d.group)}</span>${d.confirm ? '<span class="pill warn">confirm</span>' : ''}</div>
       <h3>${esc(d.name)}</h3>
+      ${typeof rgpFigure === 'function' ? rgpFigure(d.fig, esc(d.name)) : ''}
       <dl><dt>When</dt><dd class="prose">${esc(d.when)}</dd><dt>Fitting</dt><dd class="prose">${esc(d.fit)}</dd><dt>Stability</dt><dd class="prose">${esc(d.stab)}</dd></dl>
       <p class="muted" style="font-size:.9rem;margin:0"><b>Watch for:</b> ${esc(d.watch)}</p></article>`).join('')}</div>
     <h2 style="margin-top:2rem">Fitting reference</h2>

@@ -587,3 +587,22 @@ div.opt { cursor: default; } div.opt:hover { border-color: var(--line); } div.op
 @media (prefers-reduced-motion: reduce) { .bt.fled .bt-mon.foe { visibility: hidden; } }
 .bt.caught .bt-mon.foe, .bt.fainted .bt-mon.pal { visibility: hidden; }
 
+
+/* Rigid lens design cross-sections (js/rgp-figs.js) */
+.rgpfig { margin: .2rem 0 .3rem; padding: .5rem .5rem .4rem; background: var(--pad); border: 1px solid var(--pad-rule); border-radius: 8px; }
+.rgpfig svg { display: block; width: 100%; height: auto; }
+.rgpfig .eye { fill: var(--surface-2); stroke: var(--muted); stroke-width: 1; }
+.rgpfig .tear { fill: var(--fluoro); opacity: .85; }
+.rgpfig .lens { fill: hsl(var(--h, 275) 65% var(--tint-mid) / .45); stroke: hsl(var(--h, 275) 65% var(--tint-mid)); stroke-width: 1; }
+.rgpfig .soft { fill: var(--teal); fill-opacity: .3; stroke: var(--teal); stroke-width: .8; }
+.rgpfig .lead { fill: none; stroke: var(--muted); stroke-width: .7; }
+.rgpfig text { fill: var(--muted); font: 500 8.5px var(--font-body); }
+.rgpfig text.ttl { fill: var(--ink); font-weight: 600; font-size: 9.5px; }
+.rgpfig text.cap { fill: var(--ink); font-size: 9px; }
+.rgpfig text.dir { font-style: italic; }
+.rgpfig figcaption { display: flex; flex-wrap: wrap; gap: .2rem .8rem; margin-top: .3rem; font-size: .75rem; color: var(--muted); }
+.rgpfig .sw { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: .3rem; vertical-align: -1px; }
+.rgpfig .sw.lens { background: hsl(var(--h, 275) 65% var(--tint-mid) / .6); }
+.rgpfig .sw.tear { background: var(--fluoro); }
+.rgpfig .sw.eye { background: var(--surface-2); border: 1px solid var(--muted); }
+.rgpfig .sw.soft { background: color-mix(in srgb, var(--teal) 40%, transparent); border: 1px solid var(--teal); }
