@@ -148,7 +148,8 @@
   };
 
   const casePasses = (c) => sim.source === 'all'
-    || (sim.source === 'notes' ? !/^20\d\d/.test(c.source) : c.source.startsWith(sim.source));
+    || (sim.source === 'notes' ? !/^(20\d\d|Predicted)/.test(c.source)
+      : sim.source === 'pred' ? c.source.startsWith('Predicted') : c.source.startsWith(sim.source));
   // Pools, by your last result on each question. A case is "not tried" until you answer any of it,
   // "needs work" while any question in it was wrong or partly right, and "got right" once every question is.
   const POOLS = {
@@ -340,7 +341,7 @@
           <div>
             <p class="label">Source</p>
             <div class="row" style="gap:.4rem">
-              ${[['all', 'All sources'], ['2026', '2026 orals'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Notes, practice doc & slides']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
+              ${[['all', 'All sources'], ['2026', '2026 orals'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Notes, practice doc & slides'], ['pred', 'Predicted (Wed/Thu)']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
             </div>
           </div>
           <div>

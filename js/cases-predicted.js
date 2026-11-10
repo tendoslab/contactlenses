@@ -1,0 +1,382 @@
+/* Predicted cases for the rest of the 2026 orals week (Wednesday and Thursday), written on Tuesday night.
+ * NOT questions anyone has been asked yet. They're built from Lily's patterns on Monday and Tuesday:
+ *   - she reuses a spectacle Rx with the signs flipped (Mon +5.00/-2.00x145 → Mon pm -5.00/-2.00x145;
+ *     Tue +6.00/-1.00x120 → Tue -6.00/-1.00x120), so the two unflipped Monday Rxs are the likeliest next ones;
+ *   - Tuesday added RGPs, and in 2022 and 2025 Wednesday was the RGP / Ortho-K day;
+ *   - presbyopia ("the patient is 39") and extended wear / shift work have been touched on but not tested.
+ * Source starts with "Predicted" so these stay out of the 2026 filter and out of the Ocumon rarity counts.
+ */
+window.CASES = window.CASES || [];
+
+window.CASES.push(
+  {
+    id: 'pred-hyperope-presbyope-toric', cat: 'presbyopia', source: 'Predicted · Wed/Thu 2026', title: 'Low hyperope with -2.25 DC turning presbyopic',
+    theme: 'Monday\'s Rx flipped to plus · MyDay toric · hyperopes in CLs · monovision with torics · toric multifocal · LARS one clock hour',
+    patient: '45 y/o accountant. Full-time specs wearer, never worn CLs, wants them for work and weekends. Starting to hold menus further away.',
+    spec: { R: [3.0, -2.25, 130], L: [2.0, -2.25, 180] },
+    steps: [
+      {
+        phase: 'Convert Rx', topic: 'rx', type: 'rx',
+        q: 'Convert to the distance CL Rx you would order in MyDay toric (cyl −0.75, −1.25, −1.75, −2.25; 10° axes). Talk her through the power crosses.',
+        accept: { R: { sph: [3.0], cyl: [-2.25], axis: [130] }, L: { sph: [2.0], cyl: [-2.25], axis: [180] } },
+        good: 'Correct. At these powers the vertex change is small, but you still checked both meridians.',
+        bad: 'Vertex BOTH meridians: +3.00 → +3.11 and +0.75 → +0.76 (RE). The cyl comes out at −2.35, so −2.25 with the sphere kept for the SE.',
+        model: `<p><b>RE</b>: +3.00 → +3.11; +0.75 → +0.76. Exact +3.11/−2.35 x130. Round the cyl to −2.25 and keep the SE (+1.94): <b>+3.00/−2.25 x130</b>.</p>
+<p><b>LE</b>: +2.00 → +2.05; −0.25 → −0.25. Exact +2.05/−2.30 → <b>+2.00/−2.25 x180</b>.</p>
+<p>Axes 130 and 180 are made, so no nasal-torque rounding. Under ±4 D the sphere barely changes, but say that you checked, and why the cyl still moves.</p>`,
+      },
+      {
+        phase: 'Presbyopia', topic: 'presbyopia', type: 'mcq',
+        q: '"They\'re a hyperope. Will moving from specs to CLs make their near vision better or worse?"',
+        options: [
+          'Better, a little. A hyperope needs less accommodation with the plus correction on the cornea than in specs, and loses the base-out prism plus specs give at near, so CLs may buy some time before they need an add. It\'s the reverse of the myope Lily asked about on Monday.',
+          'Worse. Hyperopes need more accommodation in CLs than in specs, so near symptoms come on earlier and they will need an add straight away.',
+          'No difference. Accommodative demand depends only on the reading distance, not on where the lens sits.',
+          'Worse, because plus contact lenses magnify less than plus specs, so print looks smaller and is harder to read at any age.',
+        ],
+        answer: 0,
+        why: {
+          1: 'That\'s the myope. A hyperope accommodates LESS in CLs ("happy hyperopes, miserable myopes").',
+          2: 'The position of the correction changes the ocular accommodation needed, by a small but real amount.',
+          3: 'Image size does drop a little, but the accommodation effect is what decides it, and it favours CLs for a hyperope.',
+        },
+        good: 'Correct: hyperopes accommodate and converge less in CLs.',
+        bad: 'Hyperopes in CLs need less accommodation and less convergence than in plus specs, so near is slightly easier.',
+        model: `<p>Moving a plus correction from the spectacle plane to the cornea <b>reduces</b> the ocular accommodation needed at near, and removes the base-out prism that plus specs give when the eyes converge. So a hyperope may manage near a bit longer in CLs than in specs. The effect is small at +3.00, so at 45 they'll still need help with near soon.</p>`,
+      },
+      {
+        phase: 'Pick ONE lens', topic: 'presbyopia', type: 'mcq',
+        q: '"What are their options for near, and which would you start with?"',
+        options: [
+          'Options: distance torics with readers over the top, monovision with torics (MyDay toric both eyes, one set for near), or a toric multifocal (Biofinity toric multifocal, monthly). For a new wearer with −2.25 DC in both eyes, start with distance MyDay torics and trial monovision or readers, and keep the toric multifocal for if they want both eyes at all distances.',
+          'Give MyDay multifocal: it\'s a daily, it has an add, and a sphere masks −2.25 DC well enough in a multifocal.',
+          'Fit monovision with spherical lenses: in monovision the blur from the cyl is hidden because each eye only does one job.',
+          'Contact lenses can\'t correct presbyopia and astigmatism together, so they will need specs for near forever.',
+        ],
+        answer: 0,
+        why: {
+          1: 'MyDay multifocal is a sphere: −2.25 DC uncorrected in both eyes would give poor vision at every distance.',
+          2: 'Monovision doesn\'t hide cyl: each eye still needs its cyl corrected for its own distance.',
+          3: 'Toric monovision and toric multifocals (Biofinity toric multifocal) both exist.',
+        },
+        good: 'Good: you kept the cyl corrected whichever option you chose.',
+        bad: 'With −2.25 DC in both eyes the cyl must stay corrected: toric monovision, Biofinity toric multifocal, or distance torics plus readers.',
+        model: `<ul><li><b>Distance torics + readers</b>: best distance vision, simplest; but they still need specs to read.</li><li><b>Monovision with torics</b>: MyDay toric in both eyes, the non-dominant eye focused nearer. Daily, cheap to trial. Costs some stereopsis and contrast; not for drivers at night or precision work if they notice it.</li><li><b>Toric multifocal</b>: <b>Biofinity toric multifocal</b> (comfilcon A, monthly, cyl to −5.75, adds +1.00 to +2.50, D and N designs). Both eyes see all distances, at some loss of contrast and with possible haloes; needs a care system.</li></ul>`,
+      },
+      {
+        phase: 'Presbyopia', topic: 'rx', type: 'rx',
+        q: 'They want to trial monovision. The LE is non-dominant and the near add is +1.25. Give the CL Rx for each eye (RE for distance, LE for near).',
+        from: { R: [3.0, -2.25, 130], L: [3.25, -2.25, 180] },
+        accept: { R: { sph: [3.0], cyl: [-2.25], axis: [130] }, L: { sph: [3.25], cyl: [-2.25], axis: [180] } },
+        good: 'Correct: add the add to the spectacle Rx first, then vertex.',
+        bad: 'Add +1.25 to the LE spectacle sphere first (+3.25/−2.25 x180), then vertex: +3.25 → +3.38, +1.00 → +1.01, so +3.25/−2.25 x180.',
+        model: `<p>The add belongs at the spectacle plane, so add it to the <b>spectacle</b> Rx first and then vertex: LE +2.00 + 1.25 = <b>+3.25/−2.25 x180</b> → +3.38 and +1.01 → exact +3.38/−2.37 → <b>+3.25/−2.25 x180</b>. (Adding the add to the already-vertexed CL Rx is the slip the Fact check page warns about; at higher powers the two answers differ.)</p><p>RE stays distance: +3.00/−2.25 x130. Check dominance (sighting test, or the +1.50 blur test at distance) and trial before ordering.</p>`,
+      },
+      {
+        phase: 'Toric stability', topic: 'fitting', type: 'mcq',
+        q: 'The RE MyDay toric (x130) marking sits steadily at 7 o\'clock. What do you order, and where should the new marking sit?',
+        options: [
+          '7 o\'clock is one clock hour (30°) to my left → add → x160. The new lens should still sit at 7 o\'clock.',
+          '7 o\'clock is 30° to my left → subtract → x100. The new lens should sit at 6 o\'clock.',
+          '7 o\'clock is 10° → add → x140. The new lens should sit at 6 o\'clock.',
+          '30° is too much to compensate: change brand, even though it\'s stable.',
+        ],
+        answer: 0,
+        why: {
+          1: 'LARS: left ADD. And the new lens still sits at 7 o\'clock.',
+          2: 'One clock hour is 30°, and the marking doesn\'t move back.',
+          3: 'A stable rotation is what LARS is for. Instability is the reason to change.',
+        },
+        good: 'Correct: x160, still at 7 o\'clock.',
+        bad: '7 o\'clock = 30° to your left → add: 130 + 30 = x160. The new lens still sits at 7 o\'clock.',
+        model: `<p>RE 7 o'clock = temporal rotation (to your left as you face them) → <b>add 30</b> → <b>x160</b>. Same design, same eye, so it still sits at 7 o'clock and the cyl lands at 130. Re-check the marking with the new lens; if it now swings, change the lens.</p>`,
+      },
+      {
+        phase: 'History', topic: 'history', type: 'multi',
+        q: 'Before you settle on monovision, what else do you want to know? Select all that apply.',
+        options: [
+          'Their visual tasks and distances: computer (intermediate), reading, driving (especially at night)',
+          'Eye dominance',
+          'Whether they need fine stereopsis (sport, precision work)',
+          'Pupil size in normal and dim light',
+          'Their dry eye and tear film status (presbyopes are more often dry)',
+          'Their favourite spectacle frame brand',
+        ],
+        answers: [0, 1, 2, 3, 4],
+        why: { 5: 'Frame brand has no bearing on the lens plan.' },
+        good: 'Good: tasks, dominance, stereo needs, pupils and dryness all change the choice.',
+        bad: 'Tasks and distances, dominance, stereo needs, pupil size and dry eye all decide between monovision, multifocal or readers.',
+        model: `<p>Tasks and working distances (an accountant lives at the computer: intermediate matters), driving at night (monovision and multifocals both reduce contrast), stereo needs, dominance, pupil size (multifocal zones depend on it), and dry eye (common at this age, worse with any lens).</p>`,
+      },
+      {
+        phase: 'Aftercare', topic: 'presbyopia', type: 'mcq',
+        q: 'At the 1-week review they say: "Fine on the computer, but driving at night the lights flare and the road signs are soft." What do you do?',
+        options: [
+          'Common monovision complaint: the near eye blurs distance, and at night the bigger pupils make it worse. Options: reduce the near eye\'s add a little, give them distance-only lenses (or a distance over-spec) for night driving, or try a toric multifocal. Check both eyes\' VA and the toric marking first.',
+          'Increase the add in the near eye: a stronger add makes the near eye work harder, so the brain suppresses it better at distance.',
+          'Tell them to keep going: monovision always takes 6 months, and nothing can be changed before then.',
+          'Switch them to spherical lenses: the cyl correction is what causes the flare at night.',
+        ],
+        answer: 0,
+        why: {
+          1: 'A bigger add makes the distance blur in that eye worse.',
+          2: 'Most people adapt in 1–2 weeks; if night driving is a problem, act on it.',
+          3: 'Removing −2.25 DC would make all distances worse.',
+        },
+        good: 'Good: rule out a mislocated toric, then reduce the add or give distance lenses for driving.',
+        bad: 'Night driving is the weak point of monovision. Check the torics are on axis, then reduce the add, give distance lenses for driving, or try a toric multifocal.',
+        model: `<p>Check VA in each eye and that both torics are on axis (a rotated toric also gives flare). Then: lower the near add, give a distance-only pair (or a distance over-spec) for night driving, or move to Biofinity toric multifocal. Advise them about driving safely while adapting.</p>`,
+      },
+    ],
+  },
+
+  {
+    id: 'pred-mixed-hyperope-ew', cat: 'ew', source: 'Predicted · Wed/Thu 2026', title: 'High-cyl hyperope on night shifts wants to sleep in lenses',
+    theme: 'Monday 5pm Rx flipped to plus · MyDay with spherical equivalent vs Biofinity XR · extended wear · overnight Dk/t · CLARE, CLPU and MK',
+    patient: '28 y/o ICU nurse on rotating 12-hour shifts. First-time wearer. Asks if she can nap or sleep in her lenses between shifts.',
+    spec: { R: [5.0, -2.0, 135], L: [2.0, -3.0, 110] },
+    steps: [
+      {
+        phase: 'Convert Rx', topic: 'rx', type: 'rx',
+        q: 'Convert to a full-cyl monthly Rx: RE Biofinity toric (10° axes, max −2.25 DC), LE Biofinity XR toric (−2.75 to −5.75 DC in 0.50 steps, 5° axes).',
+        accept: { R: { sph: [5.25], cyl: [-2.25], axis: [130] }, L: { sph: [2.0, 2.25], cyl: [-2.75, -3.25], axis: [110] } },
+        good: 'Correct: RE rounded the nasal way, LE in XR with full cyl.',
+        bad: 'RE: +5.00 → +5.32, +3.00 → +3.11 → +5.25/−2.25; x135 isn\'t made → RE nasal torque → x130. LE exact +2.05/−3.04: −3.00 isn\'t made in XR, so −2.75 or −3.25 with the SE kept.',
+        model: `<p><b>RE</b>: +5.32 / +3.11 → <b>+5.25/−2.25</b>. x135 not made in 10° steps → RE rotates nasally (your right) → subtract → <b>x130</b>.</p>
+<p><b>LE</b>: +2.00 → +2.05; −1.00 → −0.99 → exact <b>+2.05/−3.04 x110</b>. XR cyls go −2.75, −3.25…: <b>+2.00/−2.75 x110</b> or <b>+2.25/−3.25 x110</b> (both keep the SE about +0.6). XR has 5° axes, so 110 is exact.</p>
+<p>The daily option: MyDay toric max −2.25 → LE <b>+1.75/−2.25 x110</b> (SE kept), with slightly softer vision.</p>`,
+      },
+      {
+        phase: 'History', topic: 'ew', type: 'mcq',
+        q: '"Can she sleep in her lenses between shifts?"',
+        options: [
+          'Only in a lens approved for it (Biofinity and Biofinity XR: up to 6 nights / 7 days in Australia), and only after she has worn them successfully on a daily-wear basis first. Explain that sleeping in any lens raises the risk of microbial keratitis several times, and that the safest choice is to take them out to sleep, even for naps.',
+          'Yes, any silicone hydrogel lens is safe to sleep in because SiHy gives enough oxygen overnight, so a nap in daily disposables is fine.',
+          'Yes, Biofinity is approved for 29 nights, so she can leave them in for the whole month.',
+          'Never: no contact lens is approved for overnight wear in Australia.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Daily disposables are not approved for overnight wear, and high Dk doesn\'t remove the infection risk of sleeping in lenses.',
+          2: 'Out of date: Australia changed Biofinity to 6 nights / 7 days in May 2024.',
+          3: 'Some lenses are approved for EW (Biofinity, Oasys 2-week: 6 nights; Air Optix Night & Day Aqua: up to 30 nights).',
+        },
+        good: 'Correct: approved lens, adapt on daily wear first, and be honest about the risk.',
+        bad: 'Only EW-approved lenses (Biofinity: 6 nights in Australia), after successful daily wear, with a clear warning that overnight wear multiplies the MK risk.',
+        model: `<p>Sleeping in lenses is the biggest single risk factor for <b>microbial keratitis</b> (risk several times higher than daily wear, even with SiHy). If she must: an EW-approved lens such as <b>Biofinity / Biofinity XR</b> (up to 6 nights / 7 days in Australia since May 2024), start on daily wear and add nights only once she's adapted, a night out of lenses each week, and close review. Better advice for a shift worker: DDs for the shift, glasses for sleep and naps.</p>`,
+      },
+      {
+        phase: 'Justify', topic: 'materials', type: 'mcq',
+        q: '"Why does Dk/t matter more overnight? Is Biofinity toric enough?"',
+        options: [
+          'With the eyes closed, oxygen comes only from the palpebral conjunctiva (about a third of open-eye levels), so the lens must transmit much more. Holden–Mertz put the overnight level at Dk/t 87 (Harvitt–Bonanno later: 125). Biofinity toric is 116 at −3.00, and this lens is thicker (plus, ballast), so expect some overnight oedema.',
+          'It doesn\'t: tears flow under the lens all night, so Dk/t only matters with the eyes open.',
+          'Any Dk/t over 24 is enough overnight; 24 is the overnight threshold, so Biofinity has plenty of margin.',
+          'Overnight wear depends on water content, not Dk/t: a 48% lens holds enough water to supply oxygen for 8 hours.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Tear exchange almost stops overnight; the cornea depends on oxygen diffusing through the lens from the lids.',
+          2: '24 (Holden–Mertz) is the daily-wear figure. Overnight it\'s 87 (or 125).',
+          3: 'In a SiHy, oxygen travels through the silicone, not the water.',
+        },
+        good: 'Correct: closed-eye oxygen is low, so the overnight thresholds are much higher.',
+        bad: 'Closed eye: oxygen only from the palpebral conjunctiva. Thresholds: 87 (Holden–Mertz) or 125 (Harvitt–Bonanno). Biofinity toric is 116, less for a thick plus toric.',
+        model: `<p>Open eye: ~21% oxygen from air. Closed eye: ~8% from the palpebral conjunctiva, and almost no tear exchange. Thresholds: <b>24</b> daily wear and <b>87</b> overnight (Holden–Mertz, 1984), later revised to <b>35</b> and <b>125</b> (Harvitt–Bonanno). Biofinity toric Dk/t is 116 at −3.00; a +5.25 toric is thicker in the centre and in the ballast, so real transmissibility is lower. Expect some morning oedema (striae); look for it at an early-morning aftercare.</p>`,
+      },
+      {
+        phase: 'Aftercare', topic: 'ew', type: 'mcq',
+        q: '"How would you review an extended wear patient?"',
+        options: [
+          'See them the morning after the first overnight wear (ideally within a couple of hours of waking, lenses in), then at 1 week, 1 month, 3 months and 6-monthly. Look for oedema (striae, folds), microcysts, limbal redness, infiltrates, staining and CLPC, and remind them of the red-eye rules.',
+          'Once a year like any other wearer: EW lenses are high Dk, so there is nothing extra to monitor.',
+          'Only when they have a problem: overnight wear is now so safe that routine aftercare isn\'t needed.',
+          'At 6 months, with lenses out for 24 hours before the visit, so that the cornea can be assessed without the lens.',
+        ],
+        answer: 0,
+        why: {
+          1: 'EW carries the highest complication risk of any modality, so it needs more frequent review, not less.',
+          2: 'MK and inflammatory events need early detection; patients must be seen routinely.',
+          3: 'For EW you want to see them with the lenses in, soon after waking, when overnight oedema is still visible.',
+        },
+        good: 'Correct: early-morning first review, then frequent.',
+        bad: 'EW needs a morning-after review (lenses in, soon after waking) and frequent follow-up.',
+        model: `<p>First review the <b>morning after</b> the first overnight wear, lenses in, within a couple of hours of waking (overnight oedema settles quickly). Then about 1 week, 1 month, 3 months, then 6-monthly. Check VA, fit, striae and folds, microcysts (develop over months), limbal and bulbar redness, infiltrates, staining, lid eversion (CLPC). Rules: "look good, feel good, see good" each morning; any red, painful eye or blurred vision → lenses out and call.</p>`,
+      },
+      {
+        phase: 'Complications', topic: 'complications', type: 'match',
+        q: 'She wakes with a red eye after a night in her lenses. Match each condition to its picture.',
+        rows: [
+          { label: 'CLARE', options: ['Acute red eye on waking, diffuse redness and small peripheral infiltrates, no epithelial break; Gram-negative endotoxin', 'Single small round peripheral infiltrate with overlying staining, mild pain; Gram-positive (Staph aureus)', 'Painful, often central or paracentral infiltrate with an epithelial defect, discharge, AC reaction', 'Arcuate split in the superior epithelium from a stiff lens'], answer: 0 },
+          { label: 'CLPU', options: ['Acute red eye on waking, no epithelial break', 'Single small round peripheral infiltrate with overlying staining, mild pain; Gram-positive (Staph aureus)', 'Painful central infiltrate with an epithelial defect and discharge', 'Diffuse punctate staining from the solution'], answer: 1 },
+          { label: 'Microbial keratitis', options: ['Acute red eye on waking, no epithelial break', 'Small peripheral round scar with mild staining', 'Painful, often central or paracentral infiltrate with an epithelial defect, discharge, AC reaction: same-day referral and intensive antibiotics', 'Papillae on the upper tarsus'], answer: 2 },
+        ],
+        good: 'Good. The red flags for MK are pain, a central lesion, an epithelial defect and AC reaction.',
+        bad: 'CLARE: no epithelial break (endotoxin). CLPU: small peripheral lesion with staining. MK: painful, often central, epithelial defect, discharge, AC reaction.',
+        model: `<p>Lenses out in all cases. <b>CLARE</b>: resolves when the lens is removed; refit and stop EW for a while. <b>CLPU</b>: small peripheral ulcer that heals to a scar; stop wear, may need prophylactic antibiotic. <b>MK</b>: treat as an emergency (Pseudomonas in soft lens wearers): same-day referral, culture, intensive fortified or fluoroquinolone drops. If in doubt, treat as MK. Keep the lens and case for culture.</p>`,
+      },
+      {
+        phase: 'Plan B', topic: 'lenschoice', type: 'mcq',
+        q: 'She decides not to sleep in lenses. "Is there anything better for a shift worker than monthlies and peroxide?"',
+        options: [
+          'Yes: daily disposables for the shifts, with glasses for sleep and naps. MyDay toric covers the RE fully and the LE at −2.25 DC with the SE kept. If she stays in monthlies, an MPS (Opti-Free PureMoist) rather than peroxide, because irregular sleep makes the 6-hour neutralisation unreliable.',
+          'Peroxide is best for shift workers because it works in 10 minutes, so she can clean the lenses during a break.',
+          'She should sleep in daily disposables instead: they\'re thrown away after use, so overnight wear is safe with them.',
+          'Nothing: shift workers can\'t wear contact lenses safely.',
+        ],
+        answer: 0,
+        why: {
+          1: 'One-step peroxide needs at least 6 hours to neutralise; inserting a lens early burns.',
+          2: 'DDs aren\'t approved for overnight wear; throwing them away doesn\'t remove the overnight risk.',
+          3: 'Shift workers can wear lenses well; it\'s the sleeping in them that needs care.',
+        },
+        good: 'Correct: DDs and glasses for sleep, MPS rather than peroxide.',
+        bad: 'DDs for the shift and glasses for sleep. If monthly: MPS rather than peroxide, because her sleep is irregular.',
+        model: `<p>DDs suit shift work: a fresh lens per shift and nothing to clean at odd hours. MyDay toric: RE +5.25/−2.25 x130, LE +1.75/−2.25 x110 (SE compromise, slightly softer LE vision). Glasses for sleep. If monthlies: an MPS that's safe if the soak is short, not peroxide.</p>`,
+      },
+    ],
+  },
+
+  {
+    id: 'pred-rgp-day-bitoric', cat: 'rgp', source: 'Predicted · Wed/Thu 2026', title: 'RGP day: 3 D of corneal toricity',
+    theme: 'Soft vs RGP · what you need for an RGP fit · spherical RGP rocks · SPE bitoric and tear lens maths · fluorescein patterns · 3 & 9 staining · RGP care',
+    patient: '26 y/o graphic designer. Soft torics never gave clear vision and the marking swung. Ks: R 42.00 @ 180 / 45.00 @ 90.',
+    findings: 'RE Ks 42.00 D @ 180 / 45.00 D @ 90 (3.00 D with-the-rule corneal toricity). HVID 11.8 mm. Normal lid tension.',
+    spec: { R: [-4.0, -3.5, 180], L: [-4.0, -3.5, 180] },
+    steps: [
+      {
+        phase: 'Convert Rx', topic: 'rx', type: 'rx',
+        q: 'First, the refraction at the corneal plane (12 mm). Give the exact-ish CL-plane Rx rounded to 0.25 D: you will compare its cyl to the corneal cyl next.',
+        accept: { R: { sph: [-3.75], cyl: [-3.0], axis: [180] }, L: { sph: [-3.75], cyl: [-3.0], axis: [180] } },
+        good: 'Correct: −3.82 / −6.88, so about −3.00 DC at the cornea.',
+        bad: 'Vertex both meridians: −4.00 → −3.82; −7.50 → −6.88. Cyl at the cornea is −3.06, so −3.75/−3.00 x180.',
+        model: `<p>−4.00 → −3.82; −7.50 → −6.88. Corneal-plane Rx <b>−3.82/−3.06 x180</b> ≈ −3.75/−3.00 x180. (No soft toric makes −3.00 DC, which is one reason the soft torics struggled.)</p>`,
+      },
+      {
+        phase: 'RGP', topic: 'rgp', type: 'mcq',
+        q: '"The corneal cyl is 3.00 D and the refractive cyl at the cornea is 3.06 D. What does that tell you, and would a spherical RGP work?"',
+        options: [
+          'Almost all the astigmatism is corneal, so a rigid lens\'s tear lens would neutralise it. But a spherical RGP on a 3.00 D toric cornea rocks along the flat meridian (and decentres), giving poor comfort and a dumbbell fluorescein pattern, so you\'d use a back-toric design: here an SPE bitoric.',
+          'The astigmatism is lenticular, so an RGP can\'t correct any of it; stay in soft torics.',
+          'A spherical RGP is ideal: the tear lens corrects all corneal cyl regardless of how toric the cornea is, and it always centres.',
+          'It tells you nothing: you need an over-refraction before you can tell where the astigmatism comes from.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Corneal cyl ≈ refractive cyl means the astigmatism is corneal, not lenticular.',
+          2: 'Optically yes, but above about 2.50 D of corneal toricity a spherical back surface rocks and decentres.',
+          3: 'Comparing Ks with the corneal-plane refraction is exactly how you tell corneal from internal astigmatism.',
+        },
+        good: 'Correct: corneal astigmatism, too toric for a spherical back surface.',
+        bad: 'Corneal cyl ≈ refractive cyl → corneal astigmatism, so an RGP corrects it. Above about 2.50 D toricity a spherical RGP rocks: use a bitoric.',
+        model: `<p>Residual (internal) cyl = refractive cyl at the cornea − corneal cyl ≈ 0, so a rigid lens's tear lens would correct it. But on a 3.00 D WTR cornea a spherical back surface bears along the flat (horizontal) meridian and stands off vertically: rocking, decentration, flexure, discomfort. Back toric when corneal toricity is above about 2.50 D. Because the refractive cyl equals the corneal cyl, the back toric's induced cyl can be cancelled by the front: <b>SPE bitoric</b>.</p>`,
+      },
+      {
+        phase: 'RGP', topic: 'rgp', type: 'multi',
+        q: '"What do you need before ordering an RGP?" Select all that apply.',
+        options: [
+          'Ks and corneal topography (toricity, eccentricity, regularity, apex position)',
+          'HVID (for the total diameter) and pupil size in normal and dim light',
+          'Lid position and tension, palpebral aperture height, blink quality',
+          'Tear film (TBUT, volume)',
+          'Refraction and VA',
+          'Axial length by biometry',
+        ],
+        answers: [0, 1, 2, 3, 4],
+        why: { 5: 'Axial length doesn\'t change the RGP fit; Ks and topography describe the surface you\'re fitting.' },
+        good: 'Good: surface, size, lids, tears and Rx.',
+        bad: 'Topography/Ks, HVID and pupils, lids and aperture, tear film, and the refraction. Axial length isn\'t needed.',
+        model: `<p>Topography gives toricity and whether it runs limbus to limbus, eccentricity (for peripheral curves), irregularity (keratoconus) and apex position. HVID sets TD (about 9.2–9.8 mm for a corneal RGP), pupil size sets the optic zone (avoid flare). Lids decide lid-attachment vs interpalpebral fitting. Tear film predicts comfort and staining.</p>`,
+      },
+      {
+        phase: 'RGP', topic: 'rgp', type: 'mcq',
+        q: 'You choose back curves of 42.00 D (flat meridian, 180) and 44.50 D (steep meridian, 90). What lens powers do you order in each meridian?',
+        options: [
+          '−3.75 D along 180 and about −6.37 D along 90. Flat meridian: BOZR on K, so no tear lens: corneal-plane power −3.82 → −3.75. Steep meridian: BOZR 0.50 D flatter than K, a −0.50 D tear lens: −6.88 + 0.50 = −6.38.',
+          '−4.00 along 180 and −7.50 along 90: an RGP takes the spectacle powers directly.',
+          '−3.75 along 180 and −7.37 along 90: a flatter fit makes a positive tear lens, so add more minus.',
+          '−3.75 in both meridians: the tear lens corrects all the cyl, so the lens power is the corneal-plane sphere.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Always vertex to the corneal plane first: at −7.50 that\'s 0.62 D.',
+          2: 'Flatter than K gives a NEGATIVE tear lens, so you need less minus (+0.50 compensation).',
+          3: 'With a toric back surface, the tear lens no longer neutralises the cyl; each meridian needs its own power.',
+        },
+        good: 'Correct: SAM FAP. Steeper add minus, flatter add plus.',
+        bad: 'Work each meridian separately: corneal-plane power, then compensate for its tear lens (flatter than K = minus tear lens → add plus).',
+        model: `<p>Each meridian: <b>CL power = corneal-plane power − tear lens power</b> (SAM FAP: Steeper Add Minus, Flatter Add Plus).</p><ul><li><b>180</b>: BOZR = flat K (42.00), tear lens 0 → −3.82 → <b>−3.75</b>.</li><li><b>90</b>: BOZR 44.50 vs K 45.00, 0.50 flatter → −0.50 tear lens → −6.88 + 0.50 = <b>−6.38</b>.</li></ul><p>The lab works out the front toric. Because the lens has SPE, the front cancels the cyl induced by the back, so it can rotate without blurring. Mandell–Moore-style guides set the steep meridian a little flatter than steep K so the lens doesn't seal off.</p>`,
+      },
+      {
+        phase: 'RGP', topic: 'rgp', type: 'mcq',
+        q: '"What\'s the difference between SPE and CPE bitorics?"',
+        options: [
+          'SPE: the front toric cancels the induced cyl only, so optically it behaves like a sphere and rotation doesn\'t matter (used when corneal cyl ≈ refractive cyl). CPE: the front also carries residual cyl, so it must stay put, and rotation blurs (used when the refractive cyl differs from the corneal cyl).',
+          'SPE is a soft lens design; CPE is the rigid equivalent.',
+          'SPE is for against-the-rule corneas and CPE for with-the-rule corneas.',
+          'There\'s no difference: both are names for front-surface torics with prism ballast.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Both are rigid bitoric designs.',
+          2: 'The choice depends on whether residual cyl remains, not the orientation of the toricity.',
+          3: 'Bitorics are stabilised by their back toric surface aligning with the cornea, not prism.',
+        },
+        good: 'Correct: SPE = no residual cyl, rotation-proof; CPE = residual cyl, needs stability.',
+        bad: 'SPE: front only cancels the induced cyl, rotates without blur. CPE: front also corrects residual cyl, so it must not rotate.',
+        model: `<p>A back toric RGP on the eye induces cyl (from the lens/tear interface). <b>SPE</b> (spherical power effect): the front toric cancels exactly that, so the lens acts like a sphere optically; it's stabilised by back-surface alignment and rotation doesn't blur. <b>CPE</b> (cylindrical power effect): the front also corrects residual cyl, so it needs to stay oriented.</p>`,
+      },
+      {
+        phase: 'Fit', topic: 'rgp', type: 'match',
+        q: 'Match each fluorescein pattern to the fit.',
+        rows: [
+          { label: 'Even thin layer centrally, mid-periphery aligned, edge band about 0.4–0.5 mm', options: ['Alignment (good fit)', 'Steep', 'Flat', 'Spherical lens on a WTR toric cornea'], answer: 0 },
+          { label: 'Central pooling, mid-peripheral touch, narrow edge band, little movement', options: ['Alignment', 'Steep', 'Flat', 'Spherical lens on a WTR toric cornea'], answer: 1 },
+          { label: 'Central touch (dark), wide peripheral pooling, lens moves a lot and decentres', options: ['Alignment', 'Steep', 'Flat', 'Spherical lens on a WTR toric cornea'], answer: 2 },
+          { label: 'Band of touch along the horizontal meridian, pooling above and below (dumbbell)', options: ['Alignment', 'Steep', 'Flat', 'Spherical lens on a WTR toric cornea'], answer: 3 },
+        ],
+        good: 'Good. Dark = touch, green = clearance.',
+        bad: 'Dark = touch, green = pooling. Steep pools centrally; flat touches centrally; a spherical lens on a WTR cornea touches along the flat (horizontal) meridian.',
+        model: `<p>Use the cobalt blue light and a yellow (Wratten) filter. Dark areas are touch, green is clearance. <b>Alignment</b>: even thin film, edge band ~0.4–0.5 mm. <b>Steep</b>: central pooling, mid-peripheral bearing, bubbles, tight. <b>Flat</b>: central bearing, peripheral pooling, wide edge, excess movement. <b>WTR toric cornea with a spherical lens</b>: horizontal band of touch with pooling at 12 and 6 (dumbbell): the cue for a back toric.</p>`,
+      },
+      {
+        phase: 'Aftercare', topic: 'complications', type: 'mcq',
+        q: 'At the 1-month review there\'s staining at 3 and 9 o\'clock. Cause and fixes?',
+        options: [
+          'Drying of the exposed cornea beside the lens edge: incomplete blinks (screen work) and edge lift that\'s too high or too low, or a low-riding lens. Fixes: blink exercises and lubricants, adjust the edge lift, improve centration (bigger TD, lid attachment), and treat dry eye. Untreated, it can progress to VLK or dellen.',
+          'An allergy to the RGP material: change to a different polymer and the staining will clear.',
+          'Hypoxia from the RGP: increase the Dk and the staining will clear.',
+          'Normal for RGPs and needs no action.',
+        ],
+        answer: 0,
+        why: {
+          1: '3 and 9 o\'clock staining is a drying (exposure) problem at the lens edge, not an allergy.',
+          2: 'It\'s from drying beside the lens edge, not hypoxia.',
+          3: 'Left alone it can progress to vascularised limbal keratitis or dellen.',
+        },
+        good: 'Correct: drying beside the edge; fix blinks, edge and centration.',
+        bad: '3 and 9 staining = drying beside the lens from incomplete blinks and poor edge design or centration.',
+        model: `<p>The lids can't wet the cornea next to the lens edge at 3 and 9 o'clock, especially with incomplete blinking (a graphic designer at a screen). Excess edge lift holds the lid off; too little edge lift traps debris. Fixes: blink exercises, lubricants, adjust the edge lift, larger TD or lid-attachment fit, manage dry eye. Can progress to <b>VLK</b> (vascularised limbal keratitis) or <b>dellen</b>.</p>`,
+      },
+      {
+        phase: 'Care system', topic: 'care', type: 'mcq',
+        q: '"How should they look after the RGPs?"',
+        options: [
+          'Rub each side with a surfactant cleaner (Boston Advance cleaner), rinse with the conditioning solution or saline, never tap water, store overnight in conditioning solution (Boston Advance, Simplus or Menicare Plus) or peroxide (AOSEPT Plus). Weekly enzyme or protein remover. Replace the case every 1–3 months; lenses roughly yearly.',
+          'Rinse under the tap and store dry: RGPs can\'t harbour microbes.',
+          'Use the soft lens MPS they already have; any MPS suits RGPs.',
+          'Boil them weekly: heat is the only way to remove protein from an RGP.',
+        ],
+        answer: 0,
+        why: {
+          1: 'Tap water carries Acanthamoeba, and RGPs need wet storage and disinfection.',
+          2: 'Soft lens MPSs aren\'t designed or approved for RGPs; use an RGP system or peroxide.',
+          3: 'Heat warps RGPs.',
+        },
+        good: 'Correct.',
+        bad: 'RGP system (Boston Advance, Simplus, Menicare Plus) or peroxide, a weekly protein remover, and no tap water.',
+        model: `<p>RGP care: surfactant clean (rub), rinse (never tap water), disinfect and condition overnight. Two-bottle Boston Advance, one-bottle Boston Simplus or Menicare Plus, or AOSEPT Plus. Weekly protein remover (deposits drive CLPC). Replace the case every 1–3 months. RGPs last about a year; replace if scratched or warped. Adaptation: comfort improves over 1–2 weeks of building up wearing time.</p>`,
+      },
+    ],
+  },
+);
