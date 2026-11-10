@@ -6,7 +6,7 @@ const vm = require('vm');
 const root = path.join(__dirname, '..');
 const ctx = { window: {} };
 vm.createContext(ctx);
-['js/cases-2025.js', 'js/cases-2022.js', 'js/cases-notes.js', 'js/cases-practice.js', 'js/data-ocumon.js']
+['js/cases-2026.js', 'js/cases-2025.js', 'js/cases-2022.js', 'js/cases-notes.js', 'js/cases-practice.js', 'js/data-ocumon.js']
   .forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f }));
 const CASES = ctx.window.CASES || [];
 const MON = ctx.window.OCUMON;

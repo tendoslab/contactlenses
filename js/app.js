@@ -340,7 +340,7 @@
           <div>
             <p class="label">Source</p>
             <div class="row" style="gap:.4rem">
-              ${[['all', 'All sources'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Notes, practice doc & slides']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
+              ${[['all', 'All sources'], ['2026', '2026 orals'], ['2025', '2025 orals'], ['2022', '2022 orals'], ['notes', 'Notes, practice doc & slides']].map(([s, label]) => `<button class="chip" data-act="source" data-v="${s}" aria-pressed="${sim.source === s}">${label}</button>`).join('')}
             </div>
           </div>
           <div>
@@ -1026,7 +1026,7 @@
     const cls = (v) => (/wrong|unsafe|not made/i.test(v) ? 'bad' : /fine/i.test(v) ? 'good' : 'warn');
     view.innerHTML = `<div class="fade">
     <section class="hero"><div><p class="label">Fact check</p><h1>What the student notes got wrong</h1>
-    <p>The 2022 and 2025 notes are student recollections and answers, written under pressure. These are the claims that needed correcting or updating. The case answer keys already use the corrected versions.</p></div></section>
+    <p>The 2022, 2025 and 2026 notes are student recollections and answers, written under pressure. These are the claims that needed correcting or updating. The case answer keys already use the corrected versions.</p></div></section>
     <div class="stack">${FACTCHECK.map((f) => `<article class="card fc"><div class="row" style="gap:.5rem"><span class="pill ${cls(f.verdict)}">${esc(f.verdict)}</span></div>
       <p class="claim">"${esc(f.claim)}"</p><p style="margin:0">${esc(f.fix)}</p></article>`).join('')}</div>
     <section class="card stack" style="margin-top:2rem"><h2 style="font-size:1.15rem">Sources checked</h2>
@@ -1068,13 +1068,13 @@
   const companion = (m = mon()) => { const p = partnerById(m.active); return p && Object.assign({}, p, { rank: rankOf(m.level) }); };
   const wildRe = {};
   const inPool = (w, c) => (wildRe[w.id] = wildRe[w.id] || new RegExp(w.match, 'i')).test(`${c.title} ${c.theme || ''}`);
-  // Rarity follows the exam: common when 3 or more cases from the 2022 and 2025 orals match the creature,
+  // Rarity follows the exam: common when 3 or more cases from the 2022, 2025 and 2026 orals match the creature,
   // uncommon for 1 or 2, and rare when only the notes, practice doc and slides cover it.
   MON.wild.forEach((w) => {
     w.asked = CASES.filter((c) => inPool(w, c) && /^20\d\d/.test(c.source)).length;
     w.tier = w.tier || (w.asked >= 3 ? 1 : w.asked ? 2 : 3);
   });
-  const askedLine = (w) => (w.asked ? `In ${w.asked} case${w.asked === 1 ? '' : 's'} from the 2022 and 2025 orals` : 'Only in the notes, practice doc and slides so far');
+  const askedLine = (w) => (w.asked ? `In ${w.asked} case${w.asked === 1 ? '' : 's'} from the 2022, 2025 and 2026 orals` : 'Only in the notes, practice doc and slides so far');
   let hunt = null, lastCat = null;
 
   // The partner sent out when the one in battle faints: the highest level of those still standing.
@@ -1724,7 +1724,7 @@
     if (!MON.wild.length) { view.innerHTML = '<div class="fade"><section class="card"><p>Ocumon data did not load.</p></section></div>'; return; }
     if (!m.active) {
       view.innerHTML = `<div class="fade"><section class="hero"><div><p class="label">Ocumon</p><h1>Pick your first partner</h1>
-        <p>Wild contact lens conditions turn up here, and each one brings a whole oral case. Fight it by working through the case from start to finish: every question you get right hits it, and every miss lets it hit back. Get enough of the case right to catch it and fill your Ocudex with all ${MON.wild.length}. Every ${MON_UNLOCK} new catches, another Ocumon joins your team (${MON.partners.length} in all), and each one levels up on its own. The common creatures are the themes the 2022 and 2025 orals asked most, so they turn up most.</p></div></section>
+        <p>Wild contact lens conditions turn up here, and each one brings a whole oral case. Fight it by working through the case from start to finish: every question you get right hits it, and every miss lets it hit back. Get enough of the case right to catch it and fill your Ocudex with all ${MON.wild.length}. Every ${MON_UNLOCK} new catches, another Ocumon joins your team (${MON.partners.length} in all), and each one levels up on its own. The common creatures are the themes the 2022, 2025 and 2026 orals asked most, so they turn up most.</p></div></section>
         <div class="arc-games">${MON.partners.filter((x) => x.starter).map((x, i) => `<section class="card arc-game hue-top mon-starter" style="--h:${x.hue};--i:${i}">
           <div class="mon-pick">${pxSprite(Object.assign({}, x, { rank: 0 }), 'front')}</div>
           <h2>${esc(x.name)}</h2><p class="muted">${esc(x.blurb)}</p>
@@ -1771,7 +1771,7 @@
             <li>🌟 Get the whole case right for a perfect catch: double the catch XP, and the creature is marked Mastered in your Ocudex</li>
             <li>❌ Wrong answer: it hits back. If your partner faints, your strongest teammate still standing takes over. Fainted Ocumon rest until tomorrow, so share the fights out. If your whole team faints the creature escapes, but you lose nothing and can finish the case for practice</li>
             <li>🏃 <b>Run</b> finds another creature. New ones only turn up in the wild; ones you’ve caught can be battled again from the Ocudex</li>
-            <li>🎓 Rarity follows the exam. <b>Common</b> (Lv ${TIER_LV[1]}) creatures match 3 or more cases from the 2022 and 2025 orals, so they turn up most and are the best ones to drill. <b>Uncommon</b> (Lv ${TIER_LV[2]}) match 1 or 2. <b>Rare</b> (Lv ${TIER_LV[3]}) are only in the notes, practice doc and slides</li>
+            <li>🎓 Rarity follows the exam. <b>Common</b> (Lv ${TIER_LV[1]}) creatures match 3 or more cases from the 2022, 2025 and 2026 orals, so they turn up most and are the best ones to drill. <b>Uncommon</b> (Lv ${TIER_LV[2]}) match 1 or 2. <b>Rare</b> (Lv ${TIER_LV[3]}) are only in the notes, practice doc and slides</li>
             <li>🎲 Creatures you haven’t caught, groups with questions that need work and the group you just fought turn up more often; ones you’ve just seen turn up less, and so do cases you’ve just done</li>
             <li>🔁 Got it right already today? No XP. New questions beat repeats</li>
             <li>🌙 XP slows after ${MON_DAILY_XP} a day; HP is restored each morning</li>
