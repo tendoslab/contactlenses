@@ -2,7 +2,7 @@
 // Ported from the Ocumon mode on the companion Thera Orals site, and inspired by the Anki add-on Ankimon.
 // Each wild creature fights with a whole case: one whose title or theme matches `match` (case-insensitive).
 // `cat` is the Ocudex group (a case category from CATS in js/app.js). Run `node tools/check-ocumon.js` after
-// editing. Rarity isn't set here: it comes from how many 2022 and 2025 oral cases match the creature, so the
+// editing. Rarity isn't set here: it comes from how many 2022, 2025 and 2026 oral cases match the creature, so the
 // themes the examiners keep asking about are the common ones. Add `tier: 1|2|3` to a creature only to override that.
 // `hint` is the line shown once caught; keep it short and clinically right.
 window.OCUMON = {
